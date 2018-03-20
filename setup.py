@@ -10,6 +10,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     name='pip-api',
+    packages=['pip_api'],
     url='http://github.com/di/pip-api',
     version='0.0.1',
 )
