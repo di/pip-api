@@ -1,0 +1,20 @@
+sudo: false
+language: python
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+
+install:
+  - pip install tox
+  - export TOX_ENV=`tox --listenvs | grep "py${TRAVIS_PYTHON_VERSION/./}" | tr '\n' ','`
+
+script: tox -e $TOX_ENV
+
+before_cache:
+  - rm -rf $HOME/.cache/pip/log
+
+cache:
+  directories:
+    - $HOME/.cache/pip
