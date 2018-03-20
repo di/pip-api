@@ -2,7 +2,13 @@ import pytest
 
 import pip_api
 
+xfail_incompatible = pytest.mark.xfail(
+    pip_api._hash.incompatible,
+    reason='Incompatible',
+)
 
+
+@xfail_incompatible
 @pytest.mark.parametrize('algorithm, expected', [
     (
         'sha256',
@@ -25,12 +31,14 @@ def test_hash(some_distribution, algorithm, expected):
     assert result == expected
 
 
+@xfail_incompatible
 def test_hash_default_algorithm_is_256(some_distribution):
     sha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 
     assert pip_api.hash(some_distribution.filename) == sha256
 
 
+@xfail_incompatible
 def test_hash_invalid_algorithm():
-    with pytest.raises(Exception):
+    with pytest.raises(pip_api.exceptions.InvalidArguments):
         pip_api.hash('whatever', 'invalid')
