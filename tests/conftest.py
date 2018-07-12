@@ -10,14 +10,13 @@ from packaging.version import Version
 
 
 @pytest.yield_fixture
-def some_distribution():
+def some_distribution(data):
     return pretend.stub(
-        filename=os.path.join(
-            os.getcwd(),
-            'tests',
-            'fixtures',
-            'some-distribution-0.0.1.tar.gz',
-        )
+        name="dummyproject",
+        version=Version('0.0.1'),
+        location=None,
+        filename=data.join('dummyproject-0.0.1.tar.gz'),
+        editable=False,
     )
 
 
