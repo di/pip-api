@@ -10,3 +10,6 @@ PYTHON_VERSION = sys.version_info
 
 # Import these because they depend on the above
 from pip_api._hash import hash  # noqa
+from pip_api._installed_distributions import (  # noqa
+    installed_distributions
+)
