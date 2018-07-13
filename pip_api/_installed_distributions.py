@@ -1,10 +1,6 @@
 from packaging.version import Version
 
-# import pip_api
 from pip_api._call import call
-from pip_api.exceptions import Incompatible
-
-incompatible = False
 
 
 class Distribution:
@@ -24,9 +20,6 @@ class Distribution:
 
 
 def installed_distributions():
-    if incompatible:
-        raise Incompatible
-
     result = call('list', '--format=legacy')
 
     # result is of the form:
