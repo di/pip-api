@@ -21,6 +21,12 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
 ### Available with all `pip` versions:
 * `pip_api.version()`
   > Returns the `pip` version as a string, e.g. `"9.0.1"`
+* `pip_api.installed_distributions()`
+  > Returns a list of all installed distributions as a `Distribution` object with the following attributes:
+  > * `Distribution.name` (`string`): The name of the installed distribution
+  > * `Distribution.version` ([`packaging.version.Version`](https://packaging.pypa.io/en/latest/version/#packaging.version.Version)): The version of the installed distribution
+  > * `Distribution.location` (`string`): The location of the installed distribution
+  > * `Distribution.editable` (`bool`): Whether the distribution is editable or not
 
 ### Available with `pip>=8.0.0`:
 * `pip_api.hash(filename, algorithm='sha256')`
