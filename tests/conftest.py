@@ -8,6 +8,8 @@ import virtualenv
 
 from packaging.version import Version
 
+import pip_api
+
 
 @pytest.yield_fixture
 def some_distribution(data):
@@ -98,7 +100,10 @@ def venv(tmpdir, isolate):
 class PipTestEnvironment:
 
     def __init__(self):
-        pass
+        # Install the right version of pip. By default,
+        # virtualenv gets the version from the wheels that
+        # are bundled along with it
+        self.run('install', 'pip=={}'.format(str(pip_api.PIP_VERSION)))
 
     def run(self, *args):
         python_location = os.environ['PIPAPI_PYTHON_LOCATION']
