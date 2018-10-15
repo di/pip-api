@@ -13,3 +13,6 @@ from pip_api._hash import hash  # noqa
 from pip_api._installed_distributions import (  # noqa
     installed_distributions
 )
+
+# Import these whenever, doesn't matter
+from pip_api._parse_requirements import parse_requirements  # noqa
