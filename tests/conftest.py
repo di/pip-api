@@ -104,7 +104,7 @@ class PipTestEnvironment:
         python_location = os.environ['PIPAPI_PYTHON_LOCATION']
         return subprocess.check_output(
             [python_location, '-m', 'pip'] + list(args)
-        )
+        ).decode('utf-8')
 
 
 @pytest.fixture
