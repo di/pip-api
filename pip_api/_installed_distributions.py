@@ -1,5 +1,8 @@
+import re
+
 from packaging.version import Version
 
+import pip_api
 from pip_api._call import call
 
 
@@ -19,25 +22,65 @@ class Distribution:
         )
 
 
-def installed_distributions():
-    result = call('list', '--format=legacy')
+def _old_installed_distributions():
+    result = call('list')
 
     # result is of the form:
     # <package_name> (<version>)
     #
     # or, if editable
     # <package_name> (<version>, <location>)
+    #
+    # or, could be a warning line
 
     ret = {}
 
+    pattern = re.compile(r'(.*) \((.*)\)')
+
     for line in result.strip().split('\n'):
-        # Split on the first whitespace to get
-        # split = ['<name>', '(<version>, <location>)']
-        split = line.split(' ', 1)
+        match = re.match(pattern, line)
+
+        if match:
+            name, paren = match.groups()
+            version, location = (paren.split(', ') + [None])[:2]
+
+            ret[name] = Distribution(name, version, location)
+        else:
+            # This is a warning line or some other output
+            pass
+
+    return ret
+
+
+def _new_installed_distributions():
+    result = call('list', '--format=columns')
+
+    # result is of the form:
+    # <package_name>   <version>
+    #
+    # or, if editable
+    # <package_name>   <version>   <location>
+    # (with arbitrary spaces)
+
+    ret = {}
+
+    # Remove first two heder lines
+    lines = result.strip().split('\n')[2:]
+
+    for line in lines:
+        # Split on whitespace to get
+        # split = ['<name>', '<version>', '<location>'|None]
+        split = line.split() + [None]
         name = split[0]
-        # Strip the first/last parens, then split on the ', ' which may be
-        # between <version> and <location> (if not pad with None)
-        version, location = (split[1][1:-1].split(', ') + [None])[:2]
+        version = split[1]
+        location = split[2]
+
         ret[name] = Distribution(name, version, location)
 
     return ret
+
+
+def installed_distributions():
+    if pip_api.PIP_VERSION < Version('9.0.0'):
+        return _old_installed_distributions()
+    return _new_installed_distributions()
