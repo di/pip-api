@@ -15,5 +15,5 @@ setup(
     python_requires='>=2.7,!=3.0,!=3.1,!=3.2,!=3.3',
     url='http://github.com/di/pip-api',
     summary='The official unofficial pip API',
-    version='0.0.2',
+    version='0.0.3',
 )
