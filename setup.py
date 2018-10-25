@@ -7,7 +7,7 @@ setup(
     author='Dustin Ingram',
     author_email='di@di.codes',
     description='The official unofficial pip API',
-    install_requires=['packaging', 'pip'],
+    install_requires=['packaging>=16.1', 'pip'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     name='pip-api',
