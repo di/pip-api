@@ -1,0 +1,16 @@
+0.0.3
+----------------------------------------------
+
+- Fixed issue where comments in requirements files were not being ignored (#10)
+
+0.0.2
+----------------------------------------------
+
+- Add `pip_api.parse_requirements` (#6)
+- Add `pip_api.installed_distributions` (#1)
+- Add support for pip 10.0.0, 18.0, and 18.1, as well as Python 3.7 compatibility (#3)
+
+0.0.1
+----------------------------------------------
+
+- Initial release

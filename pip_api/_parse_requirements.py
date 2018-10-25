@@ -23,6 +23,8 @@ parser.add_argument("-e", "--editable")
 
 operators = packaging.specifiers.Specifier._operators.keys()
 
+COMMENT_RE = re.compile(r'(^|\s)+#.*$')
+
 
 def _read_file(filename):
     with open(filename) as f:
@@ -118,6 +120,17 @@ def _skip_regex(lines_enum, options):
     return lines_enum
 
 
+def _ignore_comments(lines_enum):
+    """
+    Strips comments and filter empty lines.
+    """
+    for line_number, line in lines_enum:
+        line = COMMENT_RE.sub('', line)
+        line = line.strip()
+        if line:
+            yield line_number, line
+
+
 def parse_requirements(filename, options=None):
     to_parse = {filename}
     parsed = set()
@@ -130,6 +143,7 @@ def parse_requirements(filename, options=None):
         # Combine multi-line commands
         lines = "".join(_read_file(filename)).replace("\\\n", "").splitlines()
         lines_enum = enumerate(lines, 1)
+        lines_enum = _ignore_comments(lines_enum)
         lines_enum = _skip_regex(lines_enum, options)
 
         for lineno, line in lines_enum:
