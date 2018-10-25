@@ -33,8 +33,8 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > Takes a path to a filename of a Requirements file. Returns a mapping from package name to a [`packaging.requirements.Requirement`](https://packaging.pypa.io/en/latest/requirements/#packaging.requirements.Requirement) object with the following attributes:
   > * `Requirement.name` (`string`): The name of the requirement.
   > * `Requirement.extras` (`set`): A set of extras that the requirement specifies.
-  > * `Requirement.specifier` (`packaging.specifiers.Specifier`): A `SpecifierSet` of the version specified by the requirement.
-  > * `Requirement.marker` (`packaging.markers.Marker`): `A `Marker` of the marker for the requirement. Can be None.`
+  > * `Requirement.specifier` ([`packaging.specifiers.SpecifierSet`](https://packaging.pypa.io/en/latest/specifiers/#packaging.specifiers.SpecifierSet)): A `SpecifierSet` of the version specified by the requirement.
+  > * `Requirement.marker` ([`packaging.markers.Marker`](https://packaging.pypa.io/en/latest/markers/#packaging.markers.Marker)): A `Marker` of the marker for the requirement. Can be None.`
 
 ### Available with `pip>=8.0.0`:
 * `pip_api.hash(filename, algorithm='sha256')`
