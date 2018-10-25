@@ -17,6 +17,21 @@ def test_parse_requirements(monkeypatch):
     assert str(result['foo']) == 'foo==1.2.3'
 
 
+def test_parse_requirements_with_comments(monkeypatch):
+    files = {
+        'a.txt': [
+            '# a comment\n',
+            'foo==1.2.3 # this is a comment\n',
+        ],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, '_read_file', files.get)
+
+    result = pip_api.parse_requirements('a.txt')
+
+    assert set(result) == {'foo'}
+    assert str(result['foo']) == 'foo==1.2.3'
+
+
 @pytest.mark.parametrize('flag', ['-r', '--requirements'])
 def test_parse_requirements_recursive(monkeypatch, flag):
     files = {
