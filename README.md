@@ -1,6 +1,3 @@
-The official unofficial `pip` API.
-
-## About
 
 Since [`pip`](https://pypi.org/p/pip) is a command-line-tool, [it does not have
 an official, supported, _importable_
