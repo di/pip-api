@@ -1,10 +1,16 @@
 from pip_api._call import call
 
+_VERSION = None
+
 
 def version():
-    result = call('--version')
+    global _VERSION
+    if not _VERSION:
+        result = call('--version')
 
-    # result is of the form:
-    # pip <version> from <directory> (python <python version>)
+        # result is of the form:
+        # pip <version> from <directory> (python <python version>)
 
-    return result.split(' ')[1]
+        _VERSION = result.split(' ')[1]
+
+    return _VERSION

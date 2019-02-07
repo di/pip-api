@@ -3,7 +3,7 @@ import pytest
 import pip_api
 
 xfail_incompatible = pytest.mark.xfail(
-    pip_api._hash.incompatible,
+    pip_api._hash._incompatible(),
     reason='Incompatible',
 )
 

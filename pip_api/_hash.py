@@ -4,14 +4,14 @@ import pip_api
 from pip_api._call import call
 from pip_api.exceptions import Incompatible, InvalidArguments
 
-incompatible = pip_api.PIP_VERSION < Version('8.0.0')
-
+def _incompatible():
+    return Version(pip_api.version()) < Version('8.0.0')
 
 def hash(filename, algorithm='sha256'):
     """
     Hash the given filename. Unavailable in `pip<8.0.0`
     """
-    if incompatible:
+    if _incompatible():
         raise Incompatible
 
     if algorithm not in ['sha256', 'sha384', 'sha512']:

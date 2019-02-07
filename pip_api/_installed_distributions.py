@@ -81,6 +81,6 @@ def _new_installed_distributions():
 
 
 def installed_distributions():
-    if pip_api.PIP_VERSION < Version('9.0.0'):
+    if Version(pip_api.version()) < Version('9.0.0'):
         return _old_installed_distributions()
     return _new_installed_distributions()
