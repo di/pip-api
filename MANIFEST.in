@@ -1,2 +1,4 @@
-include README.md
-include LICENSE
+include *.md LICENSE
+recursive-include tests *.py
+global-exclude __pycache__
+global-exclude *.py[co]
