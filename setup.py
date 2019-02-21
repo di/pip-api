@@ -6,6 +6,9 @@ with open('README.md') as f:
 setup(
     author='Dustin Ingram',
     author_email='di@di.codes',
+    classifiers=[
+        "License :: OSI Approved :: Apache Software License"
+    ],
     description='The official unofficial pip API',
     install_requires=['packaging>=16.1', 'pip'],
     long_description=long_description,
