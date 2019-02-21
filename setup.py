@@ -7,7 +7,7 @@ setup(
     author='Dustin Ingram',
     author_email='di@di.codes',
     classifiers=[
-        "License :: OSI Approved :: Apache Software License"
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
