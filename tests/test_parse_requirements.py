@@ -84,3 +84,19 @@ def test_parse_requirements_multiline(monkeypatch, lines):
 
     assert set(result) == {'foo'}
     assert str(result['foo']) == 'foo==1.2.3'
+
+
+def test_parse_requirements_editable(monkeypatch):
+    files = {
+        'a.txt': [
+            "Django==1.11\n"
+            "-e git+https://github.com/foo/deal.git#egg=deal\n"
+        ],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, '_read_file', files.get)
+
+    result = pip_api.parse_requirements('a.txt')
+
+    assert set(result) == {'django', 'deal'}
+    assert str(result['django']) == 'Django==1.11'
+    assert str(result['deal']) == 'deal@ git+https://github.com/foo/deal.git#egg=deal'
