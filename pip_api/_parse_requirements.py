@@ -103,6 +103,8 @@ def _parse_editable(editable_req):
             "with #egg=your_package_name" % editable_req
         )
 
+    return package_name, url
+
 
 def _filterfalse(predicate, iterable):
     if predicate is None:
@@ -147,6 +149,7 @@ def parse_requirements(filename, options=None):
         lines_enum = _skip_regex(lines_enum, options)
 
         for lineno, line in lines_enum:
+            req = None
             known, _ = parser.parse_known_args(line.strip().split())
             if known.req:
                 try:  # Try to parse this as a requirement specification
@@ -154,6 +157,17 @@ def parse_requirements(filename, options=None):
                 except packaging.requirements.InvalidRequirement:
                     _check_invalid_requirement(known.req)
 
+            elif known.requirements:
+                if known.requirements not in parsed:
+                    to_parse.add(known.requirements)
+            elif known.editable:
+                name, url = _parse_editable(known.editable)
+                req = packaging.requirements.Requirement("%s @ %s" % (name, url))
+            else:
+                pass  # This is an invalid requirement
+
+            # If we've found a requirement, add it
+            if req:
                 req.comes_from = "-r {} (line {})".format(filename, lineno)
                 if req.name not in name_to_req:
                     name_to_req[req.name.lower()] = req
@@ -162,12 +176,5 @@ def parse_requirements(filename, options=None):
                         "Double requirement given: %s (already in %s, name=%r)"
                         % (req, name_to_req[req.name], req.name)
                     )
-            elif known.requirements:
-                if known.requirements not in parsed:
-                    to_parse.add(known.requirements)
-            elif known.editable:
-                _parse_editable(known.editable)
-            else:
-                pass  # This is an invalid requirement
 
     return name_to_req
