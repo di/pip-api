@@ -32,6 +32,24 @@ def test_parse_requirements_with_comments(monkeypatch):
     assert str(result['foo']) == 'foo==1.2.3'
 
 
+@pytest.mark.parametrize(
+    'flag', ['-i', '--index-url', '--extra-index-url', '-f', '--find-links']
+)
+def test_parse_requirements_with_index_url(monkeypatch, flag):
+    files = {
+        'a.txt': [
+            '{} https://example.com/pypi/simple\n'.format(flag),
+            'foo==1.2.3\n',
+        ],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, '_read_file', files.get)
+
+    result = pip_api.parse_requirements('a.txt')
+
+    assert set(result) == {'foo'}
+    assert str(result['foo']) == 'foo==1.2.3'
+
+
 @pytest.mark.parametrize('flag', ['-r', '--requirements'])
 def test_parse_requirements_recursive(monkeypatch, flag):
     files = {

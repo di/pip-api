@@ -20,6 +20,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("req", nargs="?")
 parser.add_argument("-r", "--requirements")
 parser.add_argument("-e", "--editable")
+# Consume index url params to avoid trying to treat them as packages.
+parser.add_argument("-i", "--index-url")
+parser.add_argument("--extra-index-url")
+parser.add_argument("-f", "--find-links")
 
 operators = packaging.specifiers.Specifier._operators.keys()
 
