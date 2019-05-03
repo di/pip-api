@@ -1,4 +1,5 @@
 import argparse
+import ast
 import os
 import re
 import traceback
@@ -75,6 +76,26 @@ def _path_to_url(path):
     return url
 
 
+def _parse_local_package_name(path):
+    '''Tokenize setup.py and walk the syntax tree to find the package name'''
+    try:
+        with open(os.path.join(path, 'setup.py')) as f:
+            tree = ast.parse(f.read())
+        setup_kwargs = [
+            expr.value.keywords for expr in tree.body
+            if isinstance(expr, ast.Expr) and isinstance(expr.value, ast.Call)
+            and expr.value.func.id == 'setup'
+        ][0]
+        value = [kw.value for kw in setup_kwargs if kw.arg == 'name'][0]
+        return value.s
+    except (IndexError, AttributeError, IOError, OSError):
+        raise PipError(
+            "Directory %r is not installable. "
+            "Could not parse package name from 'setup.py'." %
+            path
+        )
+
+
 def _parse_editable(editable_req):
     url = editable_req
 
@@ -91,7 +112,7 @@ def _parse_editable(editable_req):
         url_no_extras = _path_to_url(url_no_extras)
 
     if url_no_extras.lower().startswith('file:'):
-        return
+        return _parse_local_package_name(url_no_extras[len('file://'):]), url_no_extras
 
     if '+' not in url:
         raise PipError(
