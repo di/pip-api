@@ -8,7 +8,7 @@ import json
 
 def _get_release_data(package_name):
     response = url.urlopen("https://pypi.org/pypi/{0}/json".format(package_name))
-    data = json.loads(response).get("releases")
+    data = json.loads(str(response)).get("releases")
     return data
 
 
