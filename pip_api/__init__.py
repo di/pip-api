@@ -17,4 +17,4 @@ from pip_api._installed_distributions import (  # noqa
 # Import these whenever, doesn't matter
 from pip_api._parse_requirements import parse_requirements  # noqa
 
-from pip_api.releases import *
+from pip_api.releases import get_releases, get_latest_release
