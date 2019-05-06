@@ -15,7 +15,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    description='The official unofficial pip API',
+    description='An unofficial, importable pip API',
     install_requires=['packaging>=16.1', 'pip'],
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -24,5 +24,5 @@ setup(
     python_requires='>=2.7,!=3.0,!=3.1,!=3.2,!=3.3,!=3.4',
     url='http://github.com/di/pip-api',
     summary='An unofficial, importable pip API',
-    version='0.0.7',
+    version='0.0.8',
 )
