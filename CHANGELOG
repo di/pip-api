@@ -1,3 +1,9 @@
+0.0.8
+----------------------------------------------
+
+- Handle editable installs (#25)
+- Ignore index url parameters in parse_requirements (#25)
+
 0.0.7
 ----------------------------------------------
 
