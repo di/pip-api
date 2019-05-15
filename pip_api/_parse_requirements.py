@@ -31,6 +31,18 @@ operators = packaging.specifiers.Specifier._operators.keys()
 COMMENT_RE = re.compile(r'(^|\s)+#.*$')
 
 
+class UnparsedRequirement(object):
+    def __init__(self, name, msg, filename, lineno):
+        self.name = name
+        self.msg = msg
+        self.exception = msg
+        self.filename = filename
+        self.lineno = lineno
+
+    def __str__(self):
+        return self.msg
+
+
 def _read_file(filename):
     with open(filename) as f:
         return f.readlines()
@@ -158,7 +170,7 @@ def _ignore_comments(lines_enum):
             yield line_number, line
 
 
-def parse_requirements(filename, options=None):
+def parse_requirements(filename, options=None, include_invalid=False):
     to_parse = {filename}
     parsed = set()
     name_to_req = {}
@@ -180,7 +192,14 @@ def parse_requirements(filename, options=None):
                 try:  # Try to parse this as a requirement specification
                     req = packaging.requirements.Requirement(known.req)
                 except packaging.requirements.InvalidRequirement:
-                    _check_invalid_requirement(known.req)
+                    try:
+                        _check_invalid_requirement(known.req)
+                    except PipError as e:
+                        if include_invalid:
+                            req = UnparsedRequirement(known.req, str(e),
+                                                      filename, lineno)
+                        else:
+                            raise
 
             elif known.requirements:
                 if known.requirements not in parsed:
@@ -193,7 +212,9 @@ def parse_requirements(filename, options=None):
 
             # If we've found a requirement, add it
             if req:
-                req.comes_from = "-r {} (line {})".format(filename, lineno)
+                if not isinstance(req, UnparsedRequirement):
+                    req.comes_from = "-r {} (line {})".format(filename, lineno)
+
                 if req.name not in name_to_req:
                     name_to_req[req.name.lower()] = req
                 else:

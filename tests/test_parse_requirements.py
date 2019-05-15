@@ -1,6 +1,9 @@
+from textwrap import dedent
+
 import pytest
 
 import pip_api
+from pip_api.exceptions import PipError
 
 
 def test_parse_requirements(monkeypatch):
@@ -48,6 +51,83 @@ def test_parse_requirements_with_index_url(monkeypatch, flag):
 
     assert set(result) == {'foo'}
     assert str(result['foo']) == 'foo==1.2.3'
+
+
+PEP508_PIP_EXAMPLE_URL = (
+    'https://github.com/pypa/pip/archive/1.3.1.zip'
+    '#sha1=da9234ee9982d4bbb3c72346a6de940a148ea686'
+)
+
+
+@pytest.mark.parametrize(
+    "line, result_set, url, string, spec",
+    [
+        ("pip @ {url}\n".format(url=PEP508_PIP_EXAMPLE_URL), {"pip"}, None, "pip", ""),
+        (
+            "pip==1.3.1 @ {url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
+            {"pip"},
+            None,
+            "pip==1.3.1",
+            "==1.3.1",
+        ),
+        (
+            "pip@{url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
+            {"pip"},
+            PEP508_PIP_EXAMPLE_URL,
+            "pip@ " + PEP508_PIP_EXAMPLE_URL,  # Note extra space after @
+            "",
+        ),
+        (
+            "pip==1.3.1@{url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
+            {"pip"},
+            None,
+            "pip==1.3.1@" + PEP508_PIP_EXAMPLE_URL,  # Note no extra space after @
+            "==1.3.1@" + PEP508_PIP_EXAMPLE_URL,
+        ),
+    ],
+)
+def test_parse_requirements_PEP508(monkeypatch, line, result_set, url, string, spec):
+    files = {"a.txt": [line]}
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("a.txt")
+
+    assert set(result) == result_set
+    assert result["pip"].url == url
+    assert str(result["pip"]) == string
+    assert result["pip"].specifier == spec
+
+
+def test_parse_requirements_vcs(monkeypatch):
+    requirement_text = 'git+https://github.com/bar/foo'
+    files = {
+        'a.txt': [
+            requirement_text + '\n',
+        ],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, '_read_file', files.get)
+
+    with pytest.raises(PipError):
+        pip_api.parse_requirements('a.txt')
+
+
+def test_include_invalid_requirement(monkeypatch):
+    requirement_text = 'git+https://github.com/bar/foo'
+    files = {
+        'a.txt': [
+            requirement_text + '\n',
+        ],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, '_read_file', files.get)
+
+    result = pip_api.parse_requirements('a.txt', include_invalid=True)
+
+    assert set(result) == {requirement_text}
+    assert result[requirement_text].name == requirement_text
+    assert str(result[requirement_text]) == dedent("""
+        Invalid requirement: '{requirement_text}'
+        It looks like a path. File '{requirement_text}' does not exist.
+        """.format(requirement_text=requirement_text)).strip()
 
 
 @pytest.mark.parametrize('flag', ['-r', '--requirements'])
