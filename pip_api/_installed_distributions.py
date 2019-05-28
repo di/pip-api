@@ -7,7 +7,6 @@ from pip_api._call import call
 
 
 class Distribution:
-
     def __init__(self, name, version, location=None):
         self.name = name
         self.version = Version(version)
@@ -15,15 +14,15 @@ class Distribution:
         self.editable = bool(self.location)
 
     def __repr__(self):
-        return '<Distribution(name=\'{}\', version=\'{}\'{})>'.format(
+        return "<Distribution(name='{}', version='{}'{})>".format(
             self.name,
             self.version,
-            ", location=\'{}\'".format(self.location) if self.location else '',
+            ", location='{}'".format(self.location) if self.location else "",
         )
 
 
 def _old_installed_distributions():
-    result = call('list')
+    result = call("list")
 
     # result is of the form:
     # <package_name> (<version>)
@@ -35,14 +34,14 @@ def _old_installed_distributions():
 
     ret = {}
 
-    pattern = re.compile(r'(.*) \((.*)\)')
+    pattern = re.compile(r"(.*) \((.*)\)")
 
-    for line in result.strip().split('\n'):
+    for line in result.strip().split("\n"):
         match = re.match(pattern, line)
 
         if match:
             name, paren = match.groups()
-            version, location = (paren.split(', ') + [None])[:2]
+            version, location = (paren.split(", ") + [None])[:2]
 
             ret[name] = Distribution(name, version, location)
         else:
@@ -53,7 +52,7 @@ def _old_installed_distributions():
 
 
 def _new_installed_distributions():
-    result = call('list', '--format=columns')
+    result = call("list", "--format=columns")
 
     # result is of the form:
     # <package_name>   <version>
@@ -65,7 +64,7 @@ def _new_installed_distributions():
     ret = {}
 
     # Remove first two heder lines
-    lines = result.strip().split('\n')[2:]
+    lines = result.strip().split("\n")[2:]
 
     for line in lines:
         # Split on whitespace to get
@@ -81,6 +80,6 @@ def _new_installed_distributions():
 
 
 def installed_distributions():
-    if pip_api.PIP_VERSION < Version('9.0.0'):
+    if pip_api.PIP_VERSION < Version("9.0.0"):
         return _old_installed_distributions()
     return _new_installed_distributions()
