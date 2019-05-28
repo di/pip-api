@@ -13,8 +13,7 @@ try:  # py27
 except ImportError:
     from urllib import pathname2url
 
-import packaging.requirements
-import packaging.specifiers
+from pip_api._vendor.packaging import requirements, specifiers
 
 from pip_api.exceptions import PipError
 
@@ -27,7 +26,7 @@ parser.add_argument("-i", "--index-url")
 parser.add_argument("--extra-index-url")
 parser.add_argument("-f", "--find-links")
 
-operators = packaging.specifiers.Specifier._operators.keys()
+operators = specifiers.Specifier._operators.keys()
 
 COMMENT_RE = re.compile(r"(^|\s)+#.*$")
 
@@ -191,8 +190,8 @@ def parse_requirements(filename, options=None, include_invalid=False):
             known, _ = parser.parse_known_args(line.strip().split())
             if known.req:
                 try:  # Try to parse this as a requirement specification
-                    req = packaging.requirements.Requirement(known.req)
-                except packaging.requirements.InvalidRequirement:
+                    req = requirements.Requirement(known.req)
+                except requirements.InvalidRequirement:
                     try:
                         _check_invalid_requirement(known.req)
                     except PipError as e:
@@ -208,7 +207,7 @@ def parse_requirements(filename, options=None, include_invalid=False):
                     to_parse.add(known.requirements)
             elif known.editable:
                 name, url = _parse_editable(known.editable)
-                req = packaging.requirements.Requirement("%s @ %s" % (name, url))
+                req = requirements.Requirement("%s @ %s" % (name, url))
             else:
                 pass  # This is an invalid requirement
 

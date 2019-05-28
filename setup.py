@@ -16,7 +16,7 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     description="An unofficial, importable pip API",
-    install_requires=["packaging>=16.1", "pip"],
+    install_requires=["pip"],
     long_description=long_description,
     long_description_content_type="text/markdown",
     name="pip-api",

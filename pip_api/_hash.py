@@ -1,4 +1,4 @@
-from packaging.version import Version
+from pip_api._vendor.packaging.version import Version
 
 import pip_api
 from pip_api._call import call

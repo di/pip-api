@@ -6,7 +6,7 @@ import pytest
 import pretend
 import virtualenv
 
-from packaging.version import Version
+from pip_api._vendor.packaging.version import Version
 
 import pip_api
 
