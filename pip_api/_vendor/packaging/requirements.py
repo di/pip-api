@@ -8,7 +8,7 @@ import re
 
 from pip_api._vendor.pyparsing import stringStart, stringEnd, originalTextFor, ParseException
 from pip_api._vendor.pyparsing import ZeroOrMore, Word, Optional, Regex, Combine
-from pip_api._vendor.pyparsing import Literal as L
+from pip_api._vendor.pyparsing import Literal as L  # noqa
 from six.moves.urllib import parse as urlparse
 
 from .markers import MARKER_EXPR, Marker
