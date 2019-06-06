@@ -6,7 +6,7 @@ def test_installed_distributions(pip, some_distribution):
 
     assert some_distribution.name not in distributions
 
-    pip.run('install', some_distribution.filename)
+    pip.run("install", some_distribution.filename)
 
     distributions = pip_api.installed_distributions()
 

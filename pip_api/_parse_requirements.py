@@ -3,6 +3,7 @@ import ast
 import os
 import re
 import traceback
+
 try:  # py27
     from urllib.parse import urljoin
 except ImportError:
@@ -12,8 +13,7 @@ try:  # py27
 except ImportError:
     from urllib import pathname2url
 
-import packaging.requirements
-import packaging.specifiers
+from pip_api._vendor.packaging import requirements, specifiers
 
 from pip_api.exceptions import PipError
 
@@ -26,9 +26,9 @@ parser.add_argument("-i", "--index-url")
 parser.add_argument("--extra-index-url")
 parser.add_argument("-f", "--find-links")
 
-operators = packaging.specifiers.Specifier._operators.keys()
+operators = specifiers.Specifier._operators.keys()
 
-COMMENT_RE = re.compile(r'(^|\s)+#.*$')
+COMMENT_RE = re.compile(r"(^|\s)+#.*$")
 
 
 class UnparsedRequirement(object):
@@ -63,7 +63,7 @@ def _check_invalid_requirement(req):
 
 
 def _strip_extras(path):
-    m = re.match(r'^(.+)(\[[^\]]+\])$', path)
+    m = re.match(r"^(.+)(\[[^\]]+\])$", path)
     extras = None
     if m:
         path_no_extras = m.group(1)
@@ -75,7 +75,7 @@ def _strip_extras(path):
 
 
 def _egg_fragment(url):
-    _egg_fragment_re = re.compile(r'[#&]egg=([^&]*)')
+    _egg_fragment_re = re.compile(r"[#&]egg=([^&]*)")
     match = _egg_fragment_re.search(url)
     if not match:
         return None
@@ -84,27 +84,28 @@ def _egg_fragment(url):
 
 def _path_to_url(path):
     path = os.path.normpath(os.path.abspath(path))
-    url = urljoin('file:', pathname2url(path))
+    url = urljoin("file:", pathname2url(path))
     return url
 
 
 def _parse_local_package_name(path):
-    '''Tokenize setup.py and walk the syntax tree to find the package name'''
+    """Tokenize setup.py and walk the syntax tree to find the package name"""
     try:
-        with open(os.path.join(path, 'setup.py')) as f:
+        with open(os.path.join(path, "setup.py")) as f:
             tree = ast.parse(f.read())
         setup_kwargs = [
-            expr.value.keywords for expr in tree.body
-            if isinstance(expr, ast.Expr) and isinstance(expr.value, ast.Call)
-            and expr.value.func.id == 'setup'
+            expr.value.keywords
+            for expr in tree.body
+            if isinstance(expr, ast.Expr)
+            and isinstance(expr.value, ast.Call)
+            and expr.value.func.id == "setup"
         ][0]
-        value = [kw.value for kw in setup_kwargs if kw.arg == 'name'][0]
+        value = [kw.value for kw in setup_kwargs if kw.arg == "name"][0]
         return value.s
     except (IndexError, AttributeError, IOError, OSError):
         raise PipError(
             "Directory %r is not installable. "
-            "Could not parse package name from 'setup.py'." %
-            path
+            "Could not parse package name from 'setup.py'." % path
         )
 
 
@@ -115,22 +116,21 @@ def _parse_editable(editable_req):
     url_no_extras, extras = _strip_extras(url)
 
     if os.path.isdir(url_no_extras):
-        if not os.path.exists(os.path.join(url_no_extras, 'setup.py')):
+        if not os.path.exists(os.path.join(url_no_extras, "setup.py")):
             raise PipError(
-                "Directory %r is not installable. File 'setup.py' not found." %
-                url_no_extras
+                "Directory %r is not installable. File 'setup.py' not found."
+                % url_no_extras
             )
         # Treating it as code that has already been checked out
         url_no_extras = _path_to_url(url_no_extras)
 
-    if url_no_extras.lower().startswith('file:'):
-        return _parse_local_package_name(url_no_extras[len('file://'):]), url_no_extras
+    if url_no_extras.lower().startswith("file:"):
+        return _parse_local_package_name(url_no_extras[len("file://") :]), url_no_extras
 
-    if '+' not in url:
+    if "+" not in url:
         raise PipError(
-            '%s should either be a path to a local project or a VCS url '
-            'beginning with svn+, git+, hg+, or bzr+' %
-            editable_req
+            "%s should either be a path to a local project or a VCS url "
+            "beginning with svn+, git+, hg+, or bzr+" % editable_req
         )
 
     package_name = _egg_fragment(url)
@@ -164,7 +164,7 @@ def _ignore_comments(lines_enum):
     Strips comments and filter empty lines.
     """
     for line_number, line in lines_enum:
-        line = COMMENT_RE.sub('', line)
+        line = COMMENT_RE.sub("", line)
         line = line.strip()
         if line:
             yield line_number, line
@@ -190,14 +190,15 @@ def parse_requirements(filename, options=None, include_invalid=False):
             known, _ = parser.parse_known_args(line.strip().split())
             if known.req:
                 try:  # Try to parse this as a requirement specification
-                    req = packaging.requirements.Requirement(known.req)
-                except packaging.requirements.InvalidRequirement:
+                    req = requirements.Requirement(known.req)
+                except requirements.InvalidRequirement:
                     try:
                         _check_invalid_requirement(known.req)
                     except PipError as e:
                         if include_invalid:
-                            req = UnparsedRequirement(known.req, str(e),
-                                                      filename, lineno)
+                            req = UnparsedRequirement(
+                                known.req, str(e), filename, lineno
+                            )
                         else:
                             raise
 
@@ -206,7 +207,7 @@ def parse_requirements(filename, options=None, include_invalid=False):
                     to_parse.add(known.requirements)
             elif known.editable:
                 name, url = _parse_editable(known.editable)
-                req = packaging.requirements.Requirement("%s @ %s" % (name, url))
+                req = requirements.Requirement("%s @ %s" % (name, url))
             else:
                 pass  # This is an invalid requirement
 

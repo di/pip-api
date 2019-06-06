@@ -1,0 +1,25 @@
+[tool.black]
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | pip_api/_vendor
+)
+'''
+
+[tool.vendy]
+target = 'pip_api'
+packages = [
+    "packaging==19",
+    "pyparsing==2.4.0",
+]

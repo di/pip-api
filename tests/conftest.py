@@ -6,7 +6,7 @@ import pytest
 import pretend
 import virtualenv
 
-from packaging.version import Version
+from pip_api._vendor.packaging.version import Version
 
 import pip_api
 
@@ -15,9 +15,9 @@ import pip_api
 def some_distribution(data):
     return pretend.stub(
         name="dummyproject",
-        version=Version('0.0.1'),
+        version=Version("0.0.1"),
         location=None,
-        filename=data.join('dummyproject-0.0.1.tar.gz'),
+        filename=data.join("dummyproject-0.0.1.tar.gz"),
         editable=False,
     )
 
@@ -50,8 +50,8 @@ class TestData:
 
 @pytest.fixture
 def data(tmpdir):
-    data_location = os.path.join(tmpdir, 'data')
-    shutil.copytree(os.path.join(os.getcwd(), 'tests', 'data'), data_location)
+    data_location = os.path.join(tmpdir, "data")
+    shutil.copytree(os.path.join(os.getcwd(), "tests", "data"), data_location)
     return TestData(data_location)
 
 
@@ -87,29 +87,26 @@ def venv(tmpdir, isolate):
     venv_location = os.path.join(str(tmpdir), "workspace", "venv")
     venv = virtualenv.create_environment(venv_location)
 
-    os.environ['PIPAPI_PYTHON_LOCATION'] = os.path.join(
-        venv_location, "bin", "python"
-    )
+    os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(venv_location, "bin", "python")
 
     yield venv
 
-    del os.environ['PIPAPI_PYTHON_LOCATION']
+    del os.environ["PIPAPI_PYTHON_LOCATION"]
     shutil.rmtree(venv_location)
 
 
 class PipTestEnvironment:
-
     def __init__(self):
         # Install the right version of pip. By default,
         # virtualenv gets the version from the wheels that
         # are bundled along with it
-        self.run('install', 'pip=={}'.format(str(pip_api.PIP_VERSION)))
+        self.run("install", "pip=={}".format(str(pip_api.PIP_VERSION)))
 
     def run(self, *args):
-        python_location = os.environ['PIPAPI_PYTHON_LOCATION']
+        python_location = os.environ["PIPAPI_PYTHON_LOCATION"]
         return subprocess.check_output(
-            [python_location, '-m', 'pip'] + list(args)
-        ).decode('utf-8')
+            [python_location, "-m", "pip"] + list(args)
+        ).decode("utf-8")
 
 
 @pytest.fixture
