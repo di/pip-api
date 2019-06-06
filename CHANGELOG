@@ -1,3 +1,10 @@
+0.0.9
+----------------------------------------------
+
+- Test against pip 19.0 to 19.1.1 (#27)
+- Add include_invalid argument to parse_requirements (#9)
+- Vendor dependencies to avoid conflicts (#30, #31)
+
 0.0.8
 ----------------------------------------------
 
