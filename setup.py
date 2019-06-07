@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md") as f:
     long_description = f.read()
@@ -20,9 +20,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     name="pip-api",
-    packages=["pip_api"],
+    packages=find_packages(),
     python_requires=">=2.7,!=3.0,!=3.1,!=3.2,!=3.3",
     url="http://github.com/di/pip-api",
     summary="An unofficial, importable pip API",
-    version="0.0.9",
+    version="0.0.10",
 )
