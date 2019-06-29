@@ -176,3 +176,11 @@ def test_parse_requirements_editable_file(monkeypatch):
     assert set(result) == {"django", "pip-api"}
     assert str(result["django"]) == "Django==1.11"
     assert str(result["pip-api"]).startswith("pip-api@ file:///")
+
+
+def test_parse_requirements_with_relative_references(monkeypatch):
+    files = {"reqs/a.txt": ["-r b.txt\n"], "reqs/b.txt": ["django==1.11\n"]}
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("reqs/a.txt")
+    assert set(result) == {"django"}

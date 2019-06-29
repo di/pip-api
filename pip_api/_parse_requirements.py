@@ -204,7 +204,8 @@ def parse_requirements(filename, options=None, include_invalid=False):
 
             elif known.requirements:
                 if known.requirements not in parsed:
-                    to_parse.add(known.requirements)
+                    file_location = os.path.dirname(filename)
+                    to_parse.add(os.path.join(file_location, known.requirements))
             elif known.editable:
                 name, url = _parse_editable(known.editable)
                 req = requirements.Requirement("%s @ %s" % (name, url))
