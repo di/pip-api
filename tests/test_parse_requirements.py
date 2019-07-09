@@ -179,8 +179,12 @@ def test_parse_requirements_editable_file(monkeypatch):
 
 
 def test_parse_requirements_with_relative_references(monkeypatch):
-    files = {"reqs/a.txt": ["-r b.txt\n"], "reqs/b.txt": ["django==1.11\n"]}
+    files = {
+        "reqs/base.txt": ["django==1.11\n"],
+        "reqs/test.txt": ["-r base.txt\n"],
+        "reqs/dev.txt": ["-r base.txt\n" "-r test.txt\n"],
+    }
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 
-    result = pip_api.parse_requirements("reqs/a.txt")
+    result = pip_api.parse_requirements("reqs/dev.txt")
     assert set(result) == {"django"}
