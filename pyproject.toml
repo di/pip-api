@@ -21,6 +21,6 @@ exclude = '''
 target = 'pip_api'
 packages = [
     "packaging==19.2",
-    "pyparsing==2.4.0",
+    "pyparsing==2.4.2",
     "six==1.12.0",
 ]
