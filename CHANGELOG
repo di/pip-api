@@ -1,3 +1,12 @@
+0.0.14
+----------------------------------------------
+
+- Test against pip 19.2 to 20.0.2
+- Support Python 3.8
+- Upgrade vendored six==1.14.0
+- Upgrade vendored pyparsing==2.4.6
+- Upgrade vendored packaging==20.3
+
 0.0.13
 ----------------------------------------------
 
