@@ -33,7 +33,7 @@ def tmpdir(tmpdir):
     deleting the temporary directories at the end of each test case.
     """
     assert tmpdir.isdir()
-    yield str(tmpdir)
+    yield tmpdir
     # Clear out the temporary directory after the test has finished using it.
     # This should prevent us from needing a multiple gigabyte temporary
     # directory while running the tests.
@@ -50,7 +50,7 @@ class TestData:
 
 @pytest.fixture
 def data(tmpdir):
-    data_location = os.path.join(tmpdir, "data")
+    data_location = os.path.join(str(tmpdir), "data")
     shutil.copytree(os.path.join(os.getcwd(), "tests", "data"), data_location)
     return TestData(data_location)
 
