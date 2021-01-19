@@ -109,7 +109,7 @@ class PipTestEnvironment:
         ).decode("utf-8")
 
 
-@pytest.fixture
+@pytest.fixture()
 def pip(tmpdir, venv):
     """
     Return a PipTestEnvironment which is unique to each test function and
