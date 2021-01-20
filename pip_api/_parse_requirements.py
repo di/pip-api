@@ -4,14 +4,8 @@ import os
 import re
 import traceback
 
-try:  # py27
-    from urllib.parse import urljoin
-except ImportError:
-    from urlparse import urljoin
-try:  # py27
-    from urllib.request import pathname2url
-except ImportError:
-    from urllib import pathname2url
+from urllib.parse import urljoin
+from urllib.request import pathname2url
 
 from pip_api._vendor.packaging import requirements, specifiers
 
