@@ -1,19 +1,47 @@
 name: Test
 on: [push, pull_request]
 jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+      - name: Install tox
+        run: python -m pip install tox
+      - name: Run linting
+        run: python -m tox -e lint
+
+  build-matrix:
+    name: Build the test matrix
+    needs: lint
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+      - name: Install tox
+        run: python -m pip install tox
+      - id: set-matrix
+        run: echo "::set-output name=matrix::$(python generate_matrix.py)"
+
   test:
-    name: Python ${{ matrix.python }}
+    name: ${{ matrix.toxenv }}
+    needs: build-matrix
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        python: [3.5, 3.6, 3.7, 3.8, 3.9]
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup python
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python }}
+          python-version: ${{ matrix.python-version }}
       - name: Install tox
         run: python -m pip install tox
       - name: Run tests
-        run: python -m tox -e $(tox --listenvs | grep py$(echo ${{ matrix.python }} | tr -d .) | tr '\n' ',')
+        run: python -m tox -e ${{ matrix.toxenv }}
