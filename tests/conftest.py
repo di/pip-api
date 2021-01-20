@@ -85,7 +85,7 @@ def venv(tmpdir, isolate):
     temporary directory.
     """
     venv_location = os.path.join(str(tmpdir), "workspace", "venv")
-    venv = virtualenv.create_environment(venv_location)
+    venv = virtualenv.cli_run([venv_location])
 
     os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(venv_location, "bin", "python")
 
