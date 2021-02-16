@@ -3,13 +3,13 @@ import re
 import pip_api
 from pip_api._call import call
 
-from pip_api._vendor.packaging.version import Version
+from pip_api._vendor.packaging.version import parse
 
 
 class Distribution:
     def __init__(self, name, version, location=None):
         self.name = name
-        self.version = Version(version)
+        self.version = parse(version)
         self.location = location
         self.editable = bool(self.location)
 
@@ -80,6 +80,6 @@ def _new_installed_distributions():
 
 
 def installed_distributions():
-    if pip_api.PIP_VERSION < Version("9.0.0"):
+    if pip_api.PIP_VERSION < parse("9.0.0"):
         return _old_installed_distributions()
     return _new_installed_distributions()
