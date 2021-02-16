@@ -3,6 +3,8 @@
 
 - Drop support for Python 2.7
 - Add experimental PEP 650 support
+- Fix issue with handling LegacyVersions (#66)
+- Test against pip 20.3.4, 21.0, 21.0.1
 
 0.0.18
 ----------------------------------------------
