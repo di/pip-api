@@ -37,7 +37,7 @@ def tmpdir(tmpdir):
     # Clear out the temporary directory after the test has finished using it.
     # This should prevent us from needing a multiple gigabyte temporary
     # directory while running the tests.
-    shutil.rmtree(str(tmpdir))
+    shutil.rmtree(str(tmpdir), ignore_errors=True)
 
 
 class TestData:
