@@ -8,7 +8,7 @@ jobs:
   pip-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: guilhem/rss-issues-action
+      - uses: guilhem/rss-issues-action@0.4.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           feed: "https://pypi.org/rss/project/pip/releases.xml"
