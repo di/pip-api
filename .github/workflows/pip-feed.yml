@@ -1,0 +1,15 @@
+name: pip-feed
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  pip-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: guilhem/rss-issues-action
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          feed: "https://pypi.org/rss/project/pip/releases.xml"
+          prefix: "New pip release:"
