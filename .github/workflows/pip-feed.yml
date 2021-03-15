@@ -13,3 +13,5 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           feed: "https://pypi.org/rss/project/pip/releases.xml"
           prefix: "New pip release:"
+          lastTime: "24h"
+          labels: "pip-version"
