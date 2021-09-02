@@ -1,3 +1,5 @@
+import os
+
 import pip_api
 from pip_api._vendor.packaging.version import parse
 
@@ -17,7 +19,9 @@ def test_installed_distributions(pip, some_distribution):
 
     assert distribution.name == some_distribution.name
     assert distribution.version == some_distribution.version
-    assert distribution.location == some_distribution.location
+    # We don't know exactly where the distribution has been installed,
+    # but we know it exists.
+    assert os.path.exists(distribution.location)
     assert distribution.editable == some_distribution.editable
 
 
