@@ -1,3 +1,4 @@
+import json
 import re
 
 import pip_api
@@ -79,7 +80,23 @@ def _new_installed_distributions():
     return ret
 
 
+def _new_installed_distributions_json():
+    result = call("list", "-v", "--format=json")
+
+    ret = {}
+
+    # The returned JSON is an array of objects, each of which looks like this:
+    # { "name": "some-package", "version": "0.0.1", "location": "/path/", ... }
+    for raw_dist in json.loads(result):
+        dist = Distribution(
+            raw_dist["name"], raw_dist["version"], raw_dist["location"]
+        )
+        ret[dist.name] = dist
+
+    return ret
+
+
 def installed_distributions():
     if pip_api.PIP_VERSION < parse("9.0.0"):
         return _old_installed_distributions()
-    return _new_installed_distributions()
+    return _new_installed_distributions_json()
