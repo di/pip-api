@@ -53,34 +53,6 @@ def _old_installed_distributions():
 
 
 def _new_installed_distributions():
-    result = call("list", "--format=columns")
-
-    # result is of the form:
-    # <package_name>   <version>
-    #
-    # or, if editable
-    # <package_name>   <version>   <location>
-    # (with arbitrary spaces)
-
-    ret = {}
-
-    # Remove first two heder lines
-    lines = result.strip().split("\n")[2:]
-
-    for line in lines:
-        # Split on whitespace to get
-        # split = ['<name>', '<version>', '<location>'|None]
-        split = line.split() + [None]
-        name = split[0]
-        version = split[1]
-        location = split[2]
-
-        ret[name] = Distribution(name, version, location)
-
-    return ret
-
-
-def _new_installed_distributions_json():
     result = call("list", "-v", "--format=json")
 
     ret = {}
@@ -99,4 +71,4 @@ def _new_installed_distributions_json():
 def installed_distributions():
     if pip_api.PIP_VERSION < parse("9.0.0"):
         return _old_installed_distributions()
-    return _new_installed_distributions_json()
+    return _new_installed_distributions()
