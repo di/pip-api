@@ -62,7 +62,9 @@ def _new_installed_distributions():
     # The location key was introduced with pip 10.0.0b1, so we don't assume its
     # presence.
     for raw_dist in json.loads(result):
-        dist = Distribution(raw_dist["name"], raw_dist["version"], raw_dist.get("location"))
+        dist = Distribution(
+            raw_dist["name"], raw_dist["version"], raw_dist.get("location")
+        )
         ret[dist.name] = dist
 
     return ret
