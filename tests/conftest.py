@@ -18,7 +18,7 @@ def some_distribution(data):
         version=Version("0.0.1"),
         location=None,
         filename=data.join("dummyproject-0.0.1.tar.gz"),
-        editable=False,
+        editable=True,
     )
 
 

@@ -22,7 +22,7 @@ def test_installed_distributions(pip, some_distribution):
     # We don't know exactly where the distribution has been installed,
     # but we know it exists.
     assert os.path.exists(distribution.location)
-    assert distribution.editable == some_distribution.editable
+    assert distribution.editable
 
 
 def test_installed_distributions_legacy_version(pip, data):
