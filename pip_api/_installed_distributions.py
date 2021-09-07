@@ -1,3 +1,4 @@
+import json
 import re
 
 import pip_api
@@ -52,29 +53,19 @@ def _old_installed_distributions():
 
 
 def _new_installed_distributions():
-    result = call("list", "--format=columns")
-
-    # result is of the form:
-    # <package_name>   <version>
-    #
-    # or, if editable
-    # <package_name>   <version>   <location>
-    # (with arbitrary spaces)
+    result = call("list", "-v", "--format=json")
 
     ret = {}
 
-    # Remove first two heder lines
-    lines = result.strip().split("\n")[2:]
-
-    for line in lines:
-        # Split on whitespace to get
-        # split = ['<name>', '<version>', '<location>'|None]
-        split = line.split() + [None]
-        name = split[0]
-        version = split[1]
-        location = split[2]
-
-        ret[name] = Distribution(name, version, location)
+    # The returned JSON is an array of objects, each of which looks like this:
+    # { "name": "some-package", "version": "0.0.1", "location": "/path/", ... }
+    # The location key was introduced with pip 10.0.0b1, so we don't assume its
+    # presence.
+    for raw_dist in json.loads(result):
+        dist = Distribution(
+            raw_dist["name"], raw_dist["version"], raw_dist.get("location")
+        )
+        ret[dist.name] = dist
 
     return ret
 

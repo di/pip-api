@@ -1,3 +1,5 @@
+import os
+
 import pip_api
 from pip_api._vendor.packaging.version import parse
 
@@ -17,8 +19,20 @@ def test_installed_distributions(pip, some_distribution):
 
     assert distribution.name == some_distribution.name
     assert distribution.version == some_distribution.version
-    assert distribution.location == some_distribution.location
-    assert distribution.editable == some_distribution.editable
+
+    # Various versions of `pip` have different behavior here:
+    # * `pip` 10.0.0b1 and newer include the `location` key in the JSON output
+    # * `pip` 9.0.0 through 10.0.0b0 support JSON, but don't include `location`
+    # * `pip` versions before 9.0.0 don't support JSON and don't include
+    #   any location information in the textual output that we parse
+    if pip_api.PIP_VERSION >= parse("10.0.0b0"):
+        # We don't know exactly where the distribution has been installed,
+        # but we know it exists and therefore is editable.
+        assert os.path.exists(distribution.location)
+        assert distribution.editable
+    else:
+        assert distribution.location is None
+        assert not distribution.editable
 
 
 def test_installed_distributions_legacy_version(pip, data):
