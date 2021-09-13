@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+import os
 
 from pip_api._vendor.packaging.version import Version
 
@@ -6,13 +6,10 @@ import pip_api
 from pip_api._call import call
 from pip_api.exceptions import Incompatible, InvalidArguments
 
-if TYPE_CHECKING:
-    from os import PathLike
-
 incompatible = pip_api.PIP_VERSION < Version("8.0.0")
 
 
-def hash(filename: PathLike, algorithm: str = "sha256") -> str:
+def hash(filename: os.PathLike, algorithm: str = "sha256") -> str:
     """
     Hash the given filename. Unavailable in `pip<8.0.0`
     """

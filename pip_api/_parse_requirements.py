@@ -3,7 +3,7 @@ import ast
 import os
 import re
 import traceback
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from urllib.parse import urljoin
 from urllib.request import pathname2url
@@ -11,9 +11,6 @@ from urllib.request import pathname2url
 from pip_api._vendor.packaging import requirements, specifiers
 
 from pip_api.exceptions import PipError
-
-if TYPE_CHECKING:
-    from os import PathLike
 
 parser = argparse.ArgumentParser()
 parser.add_argument("req", nargs="?")
@@ -169,7 +166,7 @@ def _ignore_comments(lines_enum):
 
 
 def parse_requirements(
-    filename: PathLike, options: Optional[Any] = None, include_invalid: bool = False
+    filename: os.PathLike, options: Optional[Any] = None, include_invalid: bool = False
 ) -> Dict[str, Union[requirements.Requirement, UnparsedRequirement]]:
     to_parse = {filename}
     parsed = set()
