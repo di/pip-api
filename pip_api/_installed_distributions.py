@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Dict, Optional
 
 import pip_api
 from pip_api._call import call
@@ -8,7 +9,7 @@ from pip_api._vendor.packaging.version import parse
 
 
 class Distribution:
-    def __init__(self, name, version, location=None):
+    def __init__(self, name: str, version: str, location: Optional[str] = None):
         self.name = name
         self.version = parse(version)
         self.location = location
@@ -70,7 +71,7 @@ def _new_installed_distributions():
     return ret
 
 
-def installed_distributions():
+def installed_distributions() -> Dict[str, Distribution]:
     if pip_api.PIP_VERSION < parse("9.0.0"):
         return _old_installed_distributions()
     return _new_installed_distributions()

@@ -1,7 +1,7 @@
 from pip_api._call import call
 
 
-def version():
+def version() -> str:
     result = call("--version")
 
     # result is of the form:
