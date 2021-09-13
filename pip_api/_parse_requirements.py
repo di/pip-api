@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Union
 from urllib.parse import urljoin
 from urllib.request import pathname2url
 
-from pip_api._vendor.packaging import requirements, specifiers
+from pip_api._vendor.packaging import requirements, specifiers  # type: ignore
 
 from pip_api.exceptions import PipError
 
@@ -184,7 +184,7 @@ def parse_requirements(
         lines_enum = _skip_regex(lines_enum, options)
 
         for lineno, line in lines_enum:
-            req = None
+            req: Optional[Union[requirements.Requirement, UnparsedRequirement]] = None
             known, _ = parser.parse_known_args(line.strip().split())
             if known.req:
                 try:  # Try to parse this as a requirement specification
@@ -213,7 +213,7 @@ def parse_requirements(
             # If we've found a requirement, add it
             if req:
                 if not isinstance(req, UnparsedRequirement):
-                    req.comes_from = "-r {} (line {})".format(filename, lineno)
+                    req.comes_from = "-r {} (line {})".format(filename, lineno)  # type: ignore
 
                 if req.name not in name_to_req:
                     name_to_req[req.name.lower()] = req
