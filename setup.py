@@ -21,8 +21,12 @@ setup(
     long_description_content_type="text/markdown",
     name="pip-api",
     packages=find_packages(),
+    package_data={
+        "pip_api": ["py.typed"],
+    },
     python_requires=">=3.6",
     url="http://github.com/di/pip-api",
     summary="An unofficial, importable pip API",
     version="0.0.20",
+    zip_safe=False,
 )
