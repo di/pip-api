@@ -20,7 +20,6 @@ exclude = '''
 [tool.vendy]
 target = 'pip_api'
 packages = [
-    "packaging==20.3",
-    "pyparsing==2.4.6",
-    "six==1.14.0",
+    "packaging==21.0",
+    "pyparsing==2.4.7",
 ]
