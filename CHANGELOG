@@ -1,3 +1,11 @@
+0.0.21
+----------------------------------------------
+
+- Use pip list's JSON output for installed_distributions (#93)
+- Drop support for Python 3.5 (#94)
+- Update vendored dependencies (#95)
+- Add type hints (#97)
+
 0.0.20
 ----------------------------------------------
 
