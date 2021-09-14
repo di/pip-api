@@ -28,5 +28,4 @@ setup(
     url="http://github.com/di/pip-api",
     summary="An unofficial, importable pip API",
     version="0.0.20",
-    zip_safe=False,
 )
