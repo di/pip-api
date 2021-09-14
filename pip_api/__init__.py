@@ -1,11 +1,12 @@
 import sys
 
 from pip_api._vendor.packaging import version as packaging_version
+from pip_api._vendor.packaging.version import Version
 
 # Import this now because we need it below
 from pip_api._version import version
 
-PIP_VERSION = packaging_version.parse(version())
+PIP_VERSION: Version = packaging_version.parse(version())  # type: ignore
 PYTHON_VERSION = sys.version_info
 
 # Import these because they depend on the above
