@@ -188,3 +188,16 @@ def test_parse_requirements_with_relative_references(monkeypatch):
 
     result = pip_api.parse_requirements("reqs/dev.txt")
     assert set(result) == {"django"}
+
+def test_parse_requirements_with_environment_markers(monkeypatch):
+    files = {
+        "a.txt": ["foo==1.2.3 ; python_version <= '2.7'\n", "foo==3.2.1 ; python_version > '2.7'\n"]
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("a.txt")
+
+    # We don't support such old Python versions, so if we've managed to run these tests, we should
+    # have chosen foo==3.2.1
+    assert set(result) == {"foo"}
+    assert str(result["foo"]) == "foo==3.2.1; python_version > \"2.7\""
