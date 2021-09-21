@@ -13,7 +13,7 @@ from pip_api._vendor.packaging import requirements, specifiers  # type: ignore
 from pip_api.exceptions import PipError
 
 parser = argparse.ArgumentParser()
-parser.add_argument("req", nargs="?")
+parser.add_argument("req", nargs="*")
 parser.add_argument("-r", "--requirements")
 parser.add_argument("-e", "--editable")
 # Consume index url params to avoid trying to treat them as packages.
@@ -187,16 +187,21 @@ def parse_requirements(
             req: Optional[Union[requirements.Requirement, UnparsedRequirement]] = None
             known, _ = parser.parse_known_args(line.strip().split())
             if known.req:
+                # We want to stop combining strings before an @ sign with space on either side
+                req_str = str()
+                for r in known.req:
+                    if r == "@":
+                        break
+                    req_str += r
+
                 try:  # Try to parse this as a requirement specification
-                    req = requirements.Requirement(known.req)
+                    req = requirements.Requirement(req_str)
                 except requirements.InvalidRequirement:
                     try:
-                        _check_invalid_requirement(known.req)
+                        _check_invalid_requirement(req_str)
                     except PipError as e:
                         if include_invalid:
-                            req = UnparsedRequirement(
-                                known.req, str(e), filename, lineno
-                            )
+                            req = UnparsedRequirement(req_str, str(e), filename, lineno)
                         else:
                             raise
 
@@ -214,6 +219,8 @@ def parse_requirements(
             if req:
                 if not isinstance(req, UnparsedRequirement):
                     req.comes_from = "-r {} (line {})".format(filename, lineno)  # type: ignore
+                    if req.marker is not None and not req.marker.evaluate():
+                        continue
 
                 if req.name not in name_to_req:
                     name_to_req[req.name.lower()] = req
