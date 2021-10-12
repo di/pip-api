@@ -46,3 +46,22 @@ def test_installed_distributions_legacy_version(pip, data):
 
     assert "dummyproject" in distributions
     assert distributions["dummyproject"].version == parse("0.23ubuntu1")
+
+
+def test_installed_distributions_local(monkeypatch, pip):
+    # Ideally, we'd be able to compare the value of `installed_distributions`
+    # with and without the `local` flag. However, to test like this, we'd need
+    # to globally-install a package to observe the difference.
+    #
+    # This isn't practical for the purposes of a unit test, so we'll have to
+    # settle for checking that the `--local` flag gets passed in to the `pip`
+    # invocation.
+    original_call = pip_api._installed_distributions.call
+
+    def mock_call(*args, cwd=None):
+        assert "--local" in args
+        return original_call(*args, cwd=cwd)
+
+    monkeypatch.setattr(pip_api._installed_distributions, "call", mock_call)
+
+    _ = pip_api.installed_distributions(local=True)
