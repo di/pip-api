@@ -23,8 +23,11 @@ class Distribution:
         )
 
 
-def _old_installed_distributions():
-    result = call("list")
+def _old_installed_distributions(local: bool):
+    list_args = ["list"]
+    if local:
+        list_args.append("--local")
+    result = call(*list_args)
 
     # result is of the form:
     # <package_name> (<version>)
@@ -53,8 +56,11 @@ def _old_installed_distributions():
     return ret
 
 
-def _new_installed_distributions():
-    result = call("list", "-v", "--format=json")
+def _new_installed_distributions(local: bool):
+    list_args = ["list", "-v", "--format=json"]
+    if local:
+        list_args.append("--local")
+    result = call(*list_args)
 
     ret = {}
 
@@ -71,7 +77,7 @@ def _new_installed_distributions():
     return ret
 
 
-def installed_distributions() -> Dict[str, Distribution]:
+def installed_distributions(local=False) -> Dict[str, Distribution]:
     if pip_api.PIP_VERSION < parse("9.0.0"):
-        return _old_installed_distributions()
-    return _new_installed_distributions()
+        return _old_installed_distributions(local)
+    return _new_installed_distributions(local)
