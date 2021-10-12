@@ -77,7 +77,7 @@ def _new_installed_distributions(local: bool):
     return ret
 
 
-def installed_distributions(local=False) -> Dict[str, Distribution]:
+def installed_distributions(local: bool = False) -> Dict[str, Distribution]:
     if pip_api.PIP_VERSION < parse("9.0.0"):
         return _old_installed_distributions(local)
     return _new_installed_distributions(local)
