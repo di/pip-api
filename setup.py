@@ -14,6 +14,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     description="An unofficial, importable pip API",
     install_requires=["pip"],
@@ -27,5 +28,5 @@ setup(
     python_requires=">=3.6",
     url="http://github.com/di/pip-api",
     summary="An unofficial, importable pip API",
-    version="0.0.22",
+    version="0.0.23",
 )

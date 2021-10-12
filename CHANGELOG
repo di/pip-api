@@ -1,3 +1,10 @@
+0.0.23
+----------------------------------------------
+
+- Allow installed_distributions to be filtered for global distributions (#103)
+- Support Python 3.10
+- Test against pip 21.3
+
 0.0.22
 ----------------------------------------------
 
