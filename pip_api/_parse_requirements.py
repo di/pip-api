@@ -3,10 +3,14 @@ import ast
 import os
 import re
 import traceback
-from typing import Any, Dict, Optional, Union
+import posixpath
+import string
+import sys
 
-from urllib.parse import urljoin
-from urllib.request import pathname2url
+from typing import Any, Dict, Optional, Union, Tuple
+
+from urllib.parse import urljoin, unquote, urlsplit
+from urllib.request import pathname2url, url2pathname
 
 from pip_api._vendor.packaging import requirements, specifiers  # type: ignore
 
@@ -24,6 +28,148 @@ parser.add_argument("-f", "--find-links")
 operators = specifiers.Specifier._operators.keys()
 
 COMMENT_RE = re.compile(r"(^|\s)+#.*$")
+VCS_SCHEMES = ["ssh", "git", "hg", "bzr", "sftp", "svn"]
+WHEEL_EXTENSION = ".whl"
+WHEEL_FILE_RE = re.compile(
+    r"""^(?P<namever>(?P<name>.+?)-(?P<ver>.*?))
+    ((-(?P<build>\d[^-]*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
+    \.whl|\.dist-info)$""",
+    re.VERBOSE,
+)
+WINDOWS = sys.platform.startswith("win") or (sys.platform == "cli" and os.name == "nt")
+
+
+class Link:
+    def __init__(self, url):
+        # url can be a UNC windows share
+        if url.startswith("\\\\"):
+            url = _path_to_url(url)
+
+        self._parsed_url = urlsplit(url)
+        # Store the url as a private attribute to prevent accidentally
+        # trying to set a new value.
+        self._url = url
+
+    @property
+    def url(self):
+        return self._url
+
+    @property
+    def filename(self):
+        path = self.path.rstrip("/")
+        name = posixpath.basename(path)
+        if not name:
+            # Make sure we don't leak auth information if the netloc
+            # includes a username and password.
+            netloc, _ = _split_auth_from_netloc(self.netloc)
+            return netloc
+
+        name = unquote(name)
+        assert name, f"URL {self._url!r} produced no filename"
+        return name
+
+    @property
+    def file_path(self):
+        return _url_to_path(self.url)
+
+    @property
+    def scheme(self):
+        return self._parsed_url.scheme
+
+    @property
+    def netloc(self):
+        return self._parsed_url.netloc
+
+    @property
+    def path(self):
+        return unquote(self._parsed_url.path)
+
+    def splitext(self):
+        return _splitext(posixpath.basename(self.path.rstrip("/")))
+
+    @property
+    def ext(self):
+        return self.splitext()[1]
+
+    @property
+    def show_url(self):
+        return posixpath.basename(self._url.split("#", 1)[0].split("?", 1)[0])
+
+    @property
+    def is_wheel(self):
+        return self.ext == WHEEL_EXTENSION
+
+    @property
+    def is_vcs(self):
+        return self.scheme in VCS_SCHEMES
+
+
+def _splitext(path):
+    base, ext = posixpath.splitext(path)
+    if base.lower().endswith(".tar"):
+        ext = base[-4:] + ext
+        base = base[:-4]
+    return base, ext
+
+
+def _split_auth_from_netloc(netloc):
+    if "@" not in netloc:
+        return netloc, (None, None)
+
+    # Split from the right because that's how urllib.parse.urlsplit()
+    # behaves if more than one @ is present (which can be checked using
+    # the password attribute of urlsplit()'s return value).
+    auth, netloc = netloc.rsplit("@", 1)
+    pw: Optional[str] = None
+    if ":" in auth:
+        # Split from the left because that's how urllib.parse.urlsplit()
+        # behaves if more than one : is present (which again can be checked
+        # using the password attribute of the return value)
+        user, pw = auth.split(":", 1)
+    else:
+        user, pw = auth, None
+
+    user = unquote(user)
+    if pw is not None:
+        pw = unquote(pw)
+
+    return netloc, (user, pw)
+
+
+def _url_to_path(url):
+    assert url.startswith(
+        "file:"
+    ), f"You can only turn file: urls into filenames (not {url!r})"
+
+    _, netloc, path, _, _ = urlsplit(url)
+
+    if not netloc or netloc == "localhost":
+        # According to RFC 8089, same as empty authority.
+        netloc = ""
+    elif WINDOWS:
+        # If we have a UNC path, prepend UNC share notation.
+        netloc = "\\\\" + netloc
+    else:
+        raise ValueError(
+            f"non-local file URIs are not supported on this platform: {url!r}"
+        )
+
+    path = url2pathname(netloc + path)
+
+    # On Windows, urlsplit parses the path as something like "/C:/Users/foo".
+    # This creates issues for path-related functions like io.open(), so we try
+    # to detect and strip the leading slash.
+    if (
+        WINDOWS
+        and not netloc  # Not UNC.
+        and len(path) >= 3
+        and path[0] == "/"  # Leading slash to strip.
+        and path[1] in string.ascii_letters  # Drive letter.
+        and path[2:4] in (":", ":/")  # Colon + end of string, or colon + absolute path.
+    ):
+        path = path[1:]
+
+    return path
 
 
 class UnparsedRequirement(object):
@@ -165,6 +311,139 @@ def _ignore_comments(lines_enum):
             yield line_number, line
 
 
+def _get_url_scheme(url):
+    if ":" not in url:
+        return None
+    return url.split(":", 1)[0].lower()
+
+
+def _is_url(name):
+    scheme = _get_url_scheme(name)
+    if scheme is None:
+        return False
+    return scheme in ["http", "https", "file", "ftp"] + VCS_SCHEMES
+
+
+def _looks_like_path(name):
+    if os.path.sep in name:
+        return True
+    if os.path.altsep is not None and os.path.altsep in name:
+        return True
+    if name.startswith("."):
+        return True
+    return False
+
+
+def _is_installable_dir(path):
+    if not os.path.isdir(path):
+        return False
+    if os.path.isfile(os.path.join(path, "pyproject.toml")):
+        return True
+    if os.path.isfile(os.path.join(path, "setup.py")):
+        return True
+    return False
+
+
+def _is_archive_file(name):
+    ext = _splitext(name)[1].lower()
+    if ext in (
+        # ZIP extensions
+        ".zip",
+        WHEEL_EXTENSION,
+        # BZ2 extensions
+        ".tar.bz2",
+        ".tbz",
+        # TAR extensions
+        ".tar.gz",
+        ".tgz",
+        ".tar",
+        # XZ extensions
+        ".tar.xz",
+        ".txz",
+        ".tlz",
+        ".tar.lz",
+        ".tar.lzma",
+    ):
+        return True
+    return False
+
+
+def _get_url_from_path(path, name):
+    if _looks_like_path(name) and os.path.isdir(path):
+        if _is_installable_dir(path):
+            return _path_to_url(path)
+        # TODO: The is_installable_dir test here might not be necessary
+        #       now that it is done in load_pyproject_toml too.
+        raise PipError(
+            f"Directory {name!r} is not installable. Neither 'setup.py' "
+            "nor 'pyproject.toml' found."
+        )
+    if not _is_archive_file(path):
+        return None
+    if os.path.isfile(path):
+        return _path_to_url(path)
+    urlreq_parts = name.split("@", 1)
+    if len(urlreq_parts) >= 2 and not _looks_like_path(urlreq_parts[0]):
+        # If the path contains '@' and the part before it does not look
+        # like a path, try to treat it as a PEP 440 URL req instead.
+        return None
+    return _path_to_url(path)
+
+
+def _parse_requirement_url(req_str):
+    original_req_str = req_str
+
+    # Some requirements lines begin with a `git+` or similar to indicate the VCS. If this is the
+    # case, remove this before proceeding any further.
+    for v in VCS_SCHEMES:
+        if req_str.startswith(v + "+"):
+            req_str = req_str[len(v) + 1 :]
+            break
+
+    # Strip out the marker temporarily while we parse out any potential URLs
+    marker_sep = "; " if _is_url(req_str) else ";"
+    marker_str = None
+    link = None
+    if ";" in req_str:
+        req_str, marker_str = req_str.split(marker_sep, 1)
+
+    if _is_url(req_str):
+        link = Link(req_str)
+    else:
+        path = os.path.normpath(os.path.abspath(req_str))
+        p, _ = _strip_extras(path)
+        url = _get_url_from_path(p, req_str)
+        if url is not None:
+            link = Link(url)
+
+    # it's a local file, dir, or url
+    if link is not None:
+        # Handle relative file URLs
+        if link.scheme == "file" and re.search(r"\.\./", link.url):
+            link = Link(_path_to_url(os.path.normpath(os.path.abspath(link.path))))
+        # wheel file
+        if link.is_wheel:
+            wheel_info = WHEEL_FILE_RE.match(link.filename)
+            if wheel_info is None:
+                raise PipError(f"Invalid wheel name: {link.filename}")
+            wheel_name = wheel_info.group("name").replace("_", "-")
+            wheel_version = wheel_info.group("ver").replace("_", "-")
+            req_str = f"{wheel_name}=={wheel_version}"
+        else:
+            # set the req to the egg fragment.  when it's not there, this
+            # will become an 'unnamed' requirement
+            req_str = _egg_fragment(link.url)
+            if req_str is None:
+                raise PipError(f"Missing egg fragment in URL: {original_req_str}")
+            req_str = f"{req_str}@{link.url}"
+
+    # Reassemble the requirement string with the original marker
+    if marker_str is not None:
+        req_str = f"{req_str}{marker_sep}{marker_str}"
+
+    return req_str
+
+
 def parse_requirements(
     filename: os.PathLike, options: Optional[Any] = None, include_invalid: bool = False
 ) -> Dict[str, Union[requirements.Requirement, UnparsedRequirement]]:
@@ -187,15 +466,18 @@ def parse_requirements(
             req: Optional[Union[requirements.Requirement, UnparsedRequirement]] = None
             known, _ = parser.parse_known_args(line.strip().split())
             if known.req:
-                # We want to stop combining strings before an @ sign with space on either side
-                req_str = str()
-                for r in known.req:
-                    if r == "@":
-                        break
-                    req_str += r
+                req_str = str().join(known.req)
+                try:
+                    parsed_req_str = _parse_requirement_url(req_str)
+                except PipError as e:
+                    if include_invalid:
+                        req = UnparsedRequirement(req_str, str(e), filename, lineno)
+                    else:
+                        raise
 
                 try:  # Try to parse this as a requirement specification
-                    req = requirements.Requirement(req_str)
+                    if req is None:
+                        req = requirements.Requirement(parsed_req_str)
                 except requirements.InvalidRequirement:
                     try:
                         _check_invalid_requirement(req_str)
