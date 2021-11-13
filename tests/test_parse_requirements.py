@@ -239,12 +239,13 @@ def test_parse_requirements_with_environment_markers(monkeypatch):
 
 
 def test_parse_requirements_with_invalid_wheel_filename(monkeypatch):
+    INVALID_WHEEL_NAME = "pip-1.3.1-invalid-format.whl"
     files = {
-        "a.txt": ["https://github.com/pypa/pip/archive/pip-1.3.1-invalid-format.whl"]
+        "a.txt": ["https://github.com/pypa/pip/archive/" + INVALID_WHEEL_NAME],
     }
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 
-    with pytest.raises(PipError):
+    with pytest.raises(PipError, match=r"Invalid wheel name: " + INVALID_WHEEL_NAME):
         pip_api.parse_requirements("a.txt")
 
 
@@ -255,5 +256,7 @@ def test_parse_requirements_with_missing_egg_suffix(monkeypatch):
     }
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 
-    with pytest.raises(PipError):
+    with pytest.raises(
+        PipError, match=r"Missing egg fragment in URL: " + PEP508_PIP_EXAMPLE_URL
+    ):
         pip_api.parse_requirements("a.txt")
