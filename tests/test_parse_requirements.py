@@ -66,14 +66,6 @@ PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
             "",
         ),
         (
-            # Version and URL can't be combined so this all gets parsed as a legacy version
-            "pip==1.3.1 @ {url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
-            {"pip"},
-            None,
-            "pip==1.3.1@" + PEP508_PIP_EXAMPLE_URL,
-            "==1.3.1@" + PEP508_PIP_EXAMPLE_URL,
-        ),
-        (
             "pip@{url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
             {"pip"},
             PEP508_PIP_EXAMPLE_URL,
