@@ -52,7 +52,7 @@ PEP508_PIP_EXAMPLE_EGG = (
     "ssh://git@github.com/pypa/pip.git@da9234ee9982d4bbb3c72346a6de940a148ea686#egg=pip"
 )
 PEP508_PIP_EXAMPLE_EGG_FILE = "file://tmp/pip-1.3.1.zip#egg=pip"
-PEP508_PIP_EXAMPLE_EGG_WHEEL = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
+PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
 
 
 @pytest.mark.parametrize(
@@ -117,7 +117,7 @@ PEP508_PIP_EXAMPLE_EGG_WHEEL = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
             "pip@ " + PEP508_PIP_EXAMPLE_EGG_FILE,
             "",
         ),
-        (PEP508_PIP_EXAMPLE_EGG_WHEEL, {"pip"}, None, "pip==1.3.1", "==1.3.1"),
+        (PEP508_PIP_EXAMPLE_WHEEL_FILE, {"pip"}, None, "pip==1.3.1", "==1.3.1"),
     ],
 )
 def test_parse_requirements_PEP508(monkeypatch, line, result_set, url, string, spec):
