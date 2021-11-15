@@ -45,18 +45,25 @@ PEP508_PIP_EXAMPLE_URL = (
     "https://github.com/pypa/pip/archive/1.3.1.zip"
     "#sha1=da9234ee9982d4bbb3c72346a6de940a148ea686"
 )
+PEP508_PIP_EXAMPLE_WHEEL = (
+    "https://github.com/pypa/pip/archive/pip-1.3.1-py2.py3-none-any.whl"
+)
+PEP508_PIP_EXAMPLE_EGG = (
+    "ssh://git@github.com/pypa/pip.git@da9234ee9982d4bbb3c72346a6de940a148ea686#egg=pip"
+)
+PEP508_PIP_EXAMPLE_EGG_FILE = "file://tmp/pip-1.3.1.zip#egg=pip"
+PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
 
 
 @pytest.mark.parametrize(
     "line, result_set, url, string, spec",
     [
-        ("pip @ {url}\n".format(url=PEP508_PIP_EXAMPLE_URL), {"pip"}, None, "pip", ""),
         (
-            "pip==1.3.1 @ {url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
+            "pip @ {url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
             {"pip"},
-            None,
-            "pip==1.3.1",
-            "==1.3.1",
+            PEP508_PIP_EXAMPLE_URL,
+            "pip@ " + PEP508_PIP_EXAMPLE_URL,
+            "",
         ),
         (
             "pip@{url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
@@ -66,12 +73,43 @@ PEP508_PIP_EXAMPLE_URL = (
             "",
         ),
         (
+            # Version and URL can't be combined so this all gets parsed as a legacy version
             "pip==1.3.1@{url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
             {"pip"},
             None,
             "pip==1.3.1@" + PEP508_PIP_EXAMPLE_URL,  # Note no extra space after @
             "==1.3.1@" + PEP508_PIP_EXAMPLE_URL,
         ),
+        (
+            PEP508_PIP_EXAMPLE_EGG,
+            {"pip"},
+            PEP508_PIP_EXAMPLE_EGG,
+            "pip@ " + PEP508_PIP_EXAMPLE_EGG,
+            "",
+        ),
+        (
+            # VCS markers at the beginning of a URL get stripped away
+            "git+" + PEP508_PIP_EXAMPLE_EGG,
+            {"pip"},
+            PEP508_PIP_EXAMPLE_EGG,
+            "pip@ " + PEP508_PIP_EXAMPLE_EGG,
+            "",
+        ),
+        (
+            PEP508_PIP_EXAMPLE_WHEEL,
+            {"pip"},
+            None,
+            "pip==1.3.1",
+            "==1.3.1",
+        ),
+        (
+            PEP508_PIP_EXAMPLE_EGG_FILE,
+            {"pip"},
+            PEP508_PIP_EXAMPLE_EGG_FILE,
+            "pip@ " + PEP508_PIP_EXAMPLE_EGG_FILE,
+            "",
+        ),
+        (PEP508_PIP_EXAMPLE_WHEEL_FILE, {"pip"}, None, "pip==1.3.1", "==1.3.1"),
     ],
 )
 def test_parse_requirements_PEP508(monkeypatch, line, result_set, url, string, spec):
@@ -106,14 +144,7 @@ def test_include_invalid_requirement(monkeypatch):
     assert result[requirement_text].name == requirement_text
     assert (
         str(result[requirement_text])
-        == dedent(
-            """
-        Invalid requirement: '{requirement_text}'
-        It looks like a path. File '{requirement_text}' does not exist.
-        """.format(
-                requirement_text=requirement_text
-            )
-        ).strip()
+        == f"Missing egg fragment in URL: {requirement_text}"
     )
 
 
@@ -205,3 +236,27 @@ def test_parse_requirements_with_environment_markers(monkeypatch):
     # have chosen foo==3.2.1
     assert set(result) == {"foo"}
     assert str(result["foo"]) == 'foo==3.2.1; python_version > "2.7"'
+
+
+def test_parse_requirements_with_invalid_wheel_filename(monkeypatch):
+    INVALID_WHEEL_NAME = "pip-1.3.1-invalid-format.whl"
+    files = {
+        "a.txt": ["https://github.com/pypa/pip/archive/" + INVALID_WHEEL_NAME],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    with pytest.raises(PipError, match=r"Invalid wheel name: " + INVALID_WHEEL_NAME):
+        pip_api.parse_requirements("a.txt")
+
+
+def test_parse_requirements_with_missing_egg_suffix(monkeypatch):
+    # Without a package name, an `#egg=foo` suffix is required to know the package name
+    files = {
+        "a.txt": [PEP508_PIP_EXAMPLE_URL],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    with pytest.raises(
+        PipError, match=r"Missing egg fragment in URL: " + PEP508_PIP_EXAMPLE_URL
+    ):
+        pip_api.parse_requirements("a.txt")
