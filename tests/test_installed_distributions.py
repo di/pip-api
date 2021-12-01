@@ -1,4 +1,5 @@
 import os
+import pytest
 
 import pip_api
 from pip_api._vendor.packaging.version import parse
@@ -65,3 +66,28 @@ def test_installed_distributions_local(monkeypatch, pip):
     monkeypatch.setattr(pip_api._installed_distributions, "call", mock_call)
 
     _ = pip_api.installed_distributions(local=True)
+
+
+@pytest.mark.skipif(
+    pip_api.PIP_VERSION < parse("19.2"),
+    reason="Pip version too old to support --path parameter",
+)
+def test_installed_distributions_path(pip, some_distribution, target):
+    distributions = pip_api.installed_distributions()
+    assert some_distribution.name not in distributions
+
+    # No packages installed under the target directory yet
+    distributions = pip_api.installed_distributions(paths=[target])
+    assert some_distribution.name not in distributions
+
+    # Install the package under the target directory
+    pip.run("install", "--target", target, some_distribution.filename)
+
+    # If we list packages without pointing `pip-api` to the target directory, we shouldn't find the
+    # installed package
+    distributions = pip_api.installed_distributions()
+    assert some_distribution.name not in distributions
+
+    # If we set the path to the target directory, we should find the installed package
+    distributions = pip_api.installed_distributions(paths=[target])
+    assert some_distribution.name in distributions

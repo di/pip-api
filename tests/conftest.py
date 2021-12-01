@@ -95,6 +95,14 @@ def venv(tmpdir, isolate):
     shutil.rmtree(venv_location)
 
 
+@pytest.yield_fixture
+def target(tmpdir):
+    """
+    Return a path to use for installation with the `--target` flag
+    """
+    yield tmpdir
+
+
 class PipTestEnvironment:
     def __init__(self):
         # Install the right version of pip. By default,
