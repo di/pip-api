@@ -1,9 +1,11 @@
 import json
 import re
-from typing import Dict, Optional
+import os
+from typing import Dict, Optional, List
 
 import pip_api
 from pip_api._call import call
+from pip_api.exceptions import PipError
 
 from pip_api._vendor.packaging.version import parse  # type: ignore
 
@@ -56,10 +58,12 @@ def _old_installed_distributions(local: bool):
     return ret
 
 
-def _new_installed_distributions(local: bool):
+def _new_installed_distributions(local: bool, paths: List[os.PathLike]):
     list_args = ["list", "-v", "--format=json"]
     if local:
         list_args.append("--local")
+    for path in paths:
+        list_args.extend(["--path", str(path)])
     result = call(*list_args)
 
     ret = {}
@@ -77,7 +81,14 @@ def _new_installed_distributions(local: bool):
     return ret
 
 
-def installed_distributions(local: bool = False) -> Dict[str, Distribution]:
+def installed_distributions(
+    local: bool = False, paths: List[os.PathLike] = []
+) -> Dict[str, Distribution]:
+    # Check whether our version of pip supports the `--path` parameter
+    if pip_api.PIP_VERSION < parse("19.2") and paths:
+        raise PipError(
+            f"pip {pip_api.PIP_VERSION} does not support the `paths` argument"
+        )
     if pip_api.PIP_VERSION < parse("9.0.0"):
         return _old_installed_distributions(local)
-    return _new_installed_distributions(local)
+    return _new_installed_distributions(local, paths)
