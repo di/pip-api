@@ -3,6 +3,7 @@ import pytest
 
 import pip_api
 from pip_api._vendor.packaging.version import parse
+from pip_api.exceptions import PipError
 
 
 def test_installed_distributions(pip, some_distribution):
@@ -68,17 +69,21 @@ def test_installed_distributions_local(monkeypatch, pip):
     _ = pip_api.installed_distributions(local=True)
 
 
-@pytest.mark.skipif(
-    pip_api.PIP_VERSION < parse("19.2"),
-    reason="Pip version too old to support --path parameter",
-)
 def test_installed_distributions_path(pip, some_distribution, target):
+    path_supported = pip_api.PIP_VERSION >= parse("19.2")
+
     distributions = pip_api.installed_distributions()
     assert some_distribution.name not in distributions
 
+    path_unsupported_msg = r"pip .* does not support the `paths` argument"
+
     # No packages installed under the target directory yet
-    distributions = pip_api.installed_distributions(paths=[target])
-    assert some_distribution.name not in distributions
+    if path_supported:
+        distributions = pip_api.installed_distributions(paths=[target])
+        assert some_distribution.name not in distributions
+    else:
+        with pytest.raises(PipError, match=path_unsupported_msg):
+            pip_api.installed_distributions(paths=[target])
 
     # Install the package under the target directory
     pip.run("install", "--target", target, some_distribution.filename)
@@ -89,5 +94,9 @@ def test_installed_distributions_path(pip, some_distribution, target):
     assert some_distribution.name not in distributions
 
     # If we set the path to the target directory, we should find the installed package
-    distributions = pip_api.installed_distributions(paths=[target])
-    assert some_distribution.name in distributions
+    if path_supported:
+        distributions = pip_api.installed_distributions(paths=[target])
+        assert some_distribution.name in distributions
+    else:
+        with pytest.raises(PipError, match=path_unsupported_msg):
+            pip_api.installed_distributions(paths=[target])
