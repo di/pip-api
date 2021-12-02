@@ -40,3 +40,7 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
 * `pip_api.hash(filename, algorithm='sha256')`
   > Returns the resulting as a string.
   > Valid `algorithm` parameters are `'sha256'`, `'sha384'`, and `'sha512'`
+
+### Available with `pip>=19.2`:
+* `pip_api.installed_distributions(local=False, paths=[])`
+  > As described above, but with an extra optional `paths` parameter to provide a list of locations to look for installed distributions. Attempting to use the `paths` parameter with `pip<19.2` will result in a `PipError`.

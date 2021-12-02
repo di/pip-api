@@ -23,6 +23,17 @@ def some_distribution(data):
 
 
 @pytest.yield_fixture
+def other_distribution(data):
+    return pretend.stub(
+        name="fakeproject",
+        version=Version("1.0"),
+        location=None,
+        filename=data.join("fakeproject-1.0.tar.gz"),
+        editable=True,
+    )
+
+
+@pytest.yield_fixture
 def tmpdir(tmpdir):
     """
     Return a temporary directory path object which is unique to each test
@@ -93,6 +104,22 @@ def venv(tmpdir, isolate):
 
     del os.environ["PIPAPI_PYTHON_LOCATION"]
     shutil.rmtree(venv_location)
+
+
+@pytest.yield_fixture
+def target(tmpdir):
+    """
+    Return a path to use for installation with the `--target` flag
+    """
+    yield tmpdir
+
+
+@pytest.yield_fixture
+def other_target(tmpdir):
+    """
+    Return a path to use for installation with the `--target` flag
+    """
+    yield tmpdir
 
 
 class PipTestEnvironment:
