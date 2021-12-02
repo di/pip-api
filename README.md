@@ -19,14 +19,13 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
 * `pip_api.version()`
   > Returns the `pip` version as a string, e.g. `"9.0.1"`
 
-* `pip_api.installed_distributions(local=False, paths=[])`
+* `pip_api.installed_distributions(local=False)`
   > Returns a list of all installed distributions as a `Distribution` object with the following attributes:
   > * `Distribution.name` (`string`): The name of the installed distribution
   > * `Distribution.version` ([`packaging.version.Version`](https://packaging.pypa.io/en/latest/version/#packaging.version.Version)): The version of the installed distribution
   > * `Distribution.location` (`string`): The location of the installed distribution
   > * `Distribution.editable` (`bool`): Whether the distribution is editable or not
   > Optionally takes a `local` parameter to filter out globally-installed packages
-  > Optionally takes a `paths` parameter to provide a list of locations to look for installed distributions
 
 * `pip_api.parse_requirements(filename, options=None, include_invalid=False)`
   > Takes a path to a filename of a Requirements file. Returns a mapping from package name to a [`packaging.requirements.Requirement`](https://packaging.pypa.io/en/latest/requirements/#packaging.requirements.Requirement) object with the following attributes:
@@ -41,3 +40,7 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
 * `pip_api.hash(filename, algorithm='sha256')`
   > Returns the resulting as a string.
   > Valid `algorithm` parameters are `'sha256'`, `'sha384'`, and `'sha512'`
+
+### Available with `pip>=19.2`:
+* `pip_api.installed_distributions(local=False, paths=[])`
+  > As described above, but with an extra optional `paths` parameter to provide a list of locations to look for installed distributions. Attempting to use the `paths` parameter with `pip<19.2` will result in a `PipError`.
