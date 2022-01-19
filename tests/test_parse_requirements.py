@@ -141,7 +141,7 @@ def test_include_invalid_requirement(monkeypatch):
     )
 
 
-@pytest.mark.parametrize("flag", ["-r", "--requirements"])
+@pytest.mark.parametrize("flag", ["-r", "--requirement"])
 def test_parse_requirements_recursive(monkeypatch, flag):
     files = {"a.txt": ["{} b.txt\n".format(flag)], "b.txt": ["foo==1.2.3\n"]}
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
