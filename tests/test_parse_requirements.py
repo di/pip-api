@@ -81,13 +81,6 @@ PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
             "==1.3.1@" + PEP508_PIP_EXAMPLE_URL,
         ),
         (
-            PEP508_PIP_EXAMPLE_EGG,
-            {"pip"},
-            PEP508_PIP_EXAMPLE_EGG,
-            "pip@ " + PEP508_PIP_EXAMPLE_EGG,
-            "",
-        ),
-        (
             # VCS markers at the beginning of a URL get stripped away
             "git+" + PEP508_PIP_EXAMPLE_EGG,
             {"pip"},
