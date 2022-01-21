@@ -11,29 +11,29 @@ from pip_api._vendor.packaging.version import Version
 import pip_api
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def some_distribution(data):
     return pretend.stub(
         name="dummyproject",
         version=Version("0.0.1"),
         location=None,
-        filename=data.join("dummyproject-0.0.1.tar.gz"),
+        filename=data.join("dummyproject-0.0.1-py3-none-any.whl"),
         editable=True,
     )
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def other_distribution(data):
     return pretend.stub(
         name="fakeproject",
         version=Version("1.0"),
         location=None,
-        filename=data.join("fakeproject-1.0.tar.gz"),
+        filename=data.join("fakeproject-1.0-py3-none-any.whl"),
         editable=True,
     )
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def tmpdir(tmpdir):
     """
     Return a temporary directory path object which is unique to each test
@@ -88,7 +88,7 @@ def isolate(tmpdir):
     os.environ["PIP_DISABLE_PIP_VERSION_CHECK"] = "true"
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def venv(tmpdir, isolate):
     """
     Return a virtual environment which is unique to each test function
@@ -106,7 +106,7 @@ def venv(tmpdir, isolate):
     shutil.rmtree(venv_location)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def target(tmpdir):
     """
     Return a path to use for installation with the `--target` flag
@@ -114,7 +114,7 @@ def target(tmpdir):
     yield tmpdir
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def other_target(tmpdir):
     """
     Return a path to use for installation with the `--target` flag
