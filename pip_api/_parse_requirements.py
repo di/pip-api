@@ -18,7 +18,7 @@ from pip_api.exceptions import PipError
 
 parser = argparse.ArgumentParser()
 parser.add_argument("req", nargs="*")
-parser.add_argument("-r", "--requirements")
+parser.add_argument("-r", "--requirement")
 parser.add_argument("-e", "--editable")
 # Consume index url params to avoid trying to treat them as packages.
 parser.add_argument("-i", "--index-url")
@@ -487,8 +487,8 @@ def parse_requirements(
                         else:
                             raise
 
-            elif known.requirements:
-                full_path = os.path.join(dirname, known.requirements)
+            elif known.requirement:
+                full_path = os.path.join(dirname, known.requirement)
                 if full_path not in parsed:
                     to_parse.add(full_path)
             elif known.editable:
