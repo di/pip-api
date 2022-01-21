@@ -17,7 +17,7 @@ def some_distribution(data):
         name="dummyproject",
         version=Version("0.0.1"),
         location=None,
-        filename=data.join("dummyproject-0.0.1.tar.gz"),
+        filename=data.join("dummyproject-0.0.1-py3-none-any.whl"),
         editable=True,
     )
 
@@ -28,7 +28,7 @@ def other_distribution(data):
         name="fakeproject",
         version=Version("1.0"),
         location=None,
-        filename=data.join("fakeproject-1.0.tar.gz"),
+        filename=data.join("fakeproject-1.0-py3-none-any.whl"),
         editable=True,
     )
 

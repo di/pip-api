@@ -11,16 +11,14 @@ xfail_incompatible = pytest.mark.xfail(
 @pytest.mark.parametrize(
     "algorithm, expected",
     [
-        ("sha256", "c3ebc5b7bc06d4466d339f4d8d1e61d1fdc256dd913d6d5752acea9ce5581a15"),
+        ("sha256", "cce4031ec744585688ddab649427133ac22396da29ad82fdbd11692c3a26fe19"),
         (
             "sha384",
-            "f2cf1e1a9235568adf0bd19ea41fff179c8f3cc1155ad9f806225a9fe3ea8ba57d3bda"
-            "65bd90370aa681f1d4d9251dd8",
+            "22101ffa84bad5c710c3b6eb719c4a2ac6546df2556bbe140e1fb4e628872af2344311662d4679088c12ab685c2e16dd",
         ),
         (
             "sha512",
-            "42444c9b60c49bf932562195d2f894e3031bbb8c11a22b414d335b2c862147377ec0c4"
-            "eb718ac599eff2fac7ecf8333ca5cc0efc75c12965f0386bc1f6624a01",
+            "73c8fa635bffa09eaf9ab70f22d289b3049e4906ff9e77bb24d247820f7f684c948daa77ed924e1851a71e40aea92e022fcf8092ff7c6197585289b42b60352b",
         ),
     ],
 )
@@ -32,7 +30,7 @@ def test_hash(some_distribution, algorithm, expected):
 
 @xfail_incompatible
 def test_hash_default_algorithm_is_256(some_distribution):
-    sha256 = "c3ebc5b7bc06d4466d339f4d8d1e61d1fdc256dd913d6d5752acea9ce5581a15"
+    sha256 = "cce4031ec744585688ddab649427133ac22396da29ad82fdbd11692c3a26fe19"
 
     assert pip_api.hash(some_distribution.filename) == sha256
 
