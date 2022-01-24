@@ -6,8 +6,23 @@ API](https://pip.pypa.io/en/latest/user_guide/#using-pip-from-your-program).
 However, this does not mean that people haven't tried to `import pip`, usually
 to end up with much headache when `pip`'s maintainers do routine refactoring.
 
-This project attempts to provide an importable `pip` API, which is _fully
+## Goal
+The goal of this project is to provide an importable `pip` API, which is _fully
 compliant_ with the recommended method of using `pip` from your program.
+
+How? By providing an importable API that wraps command-line calls to `pip`,
+this library can be used as a drop-in replacement for existing uses of `pip`'s
+internal API.
+
+### Scope
+This goal means that any new API added here must have the following
+equivalents:
+
+- some internal `pip` API (or combination of internal APIs)
+- some CLI calls (or combination of CLI calls)
+
+Any functionality that is not currently possible from internal `pip` API or
+CLI calls is out of scope.
 
 ## Supported Commands
 
