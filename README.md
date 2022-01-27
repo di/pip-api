@@ -45,7 +45,7 @@ You can install `pip-api` with either `pip` or with `conda`.
 **With pip**:
 
 ```sh
-pip install pip-api
+python -m pip install pip-api
 ```
 
 **With conda**:
