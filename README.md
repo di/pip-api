@@ -1,4 +1,18 @@
 
+<!--- BADGES: START --->
+[![GitHub - License](https://img.shields.io/github/license/di/pip-api?logo=github&style=flat&color=green)][#github-license]
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pip-api?logo=pypi&style=flat&color=blue)][#pypi-package]
+[![PyPI - Package Version](https://img.shields.io/pypi/v/pip-api?logo=pypi&style=flat&color=orange)][#pypi-package]
+[![Conda - Platform](https://img.shields.io/conda/pn/conda-forge/pip-api?logo=anaconda&style=flat)][#conda-forge-package]
+[![Conda (channel only)](https://img.shields.io/conda/vn/conda-forge/pip-api?logo=anaconda&style=flat&color=orange)][#conda-forge-package]
+[![Conda Recipe](https://img.shields.io/static/v1?logo=conda-forge&style=flat&color=green&label=recipe&message=pip-api)][#conda-forge-feedstock]
+
+[#github-license]: https://github.com/di/pip-api/blob/master/LICENSE
+[#pypi-package]: https://pypi.org/project/pip-api/
+[#conda-forge-package]: https://anaconda.org/conda-forge/pip-api
+[#conda-forge-feedstock]: https://github.com/conda-forge/pip-api-feedstock
+<!--- BADGES: END --->
+
 Since [`pip`](https://pypi.org/p/pip) is a command-line-tool, [it does not have
 an official, supported, _importable_
 API](https://pip.pypa.io/en/latest/user_guide/#using-pip-from-your-program).
@@ -23,6 +37,22 @@ equivalents:
 
 Any functionality that is not currently possible from internal `pip` API or
 CLI calls is out of scope.
+
+## Installation
+
+You can install `pip-api` with either `pip` or with `conda`.
+
+**With pip**:
+
+```sh
+python -m pip install pip-api
+```
+
+**With conda**:
+
+```sh
+conda install -c conda-forge pip-api
+```
 
 ## Supported Commands
 
