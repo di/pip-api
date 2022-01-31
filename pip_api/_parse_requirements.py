@@ -43,6 +43,7 @@ WINDOWS = sys.platform.startswith("win") or (sys.platform == "cli" and os.name =
 # https://pip.pypa.io/en/stable/cli/pip_hash/
 VALID_HASHES = {"sha256", "sha384", "sha512"}
 
+
 class Link:
     def __init__(self, url):
         # url can be a UNC windows share
@@ -181,7 +182,6 @@ class Requirement(requirements.Requirement):
         self.hashes = kwargs.pop("hashes", None)
 
         super().__init__(*args, **kwargs)
-
 
 
 class UnparsedRequirement(object):
