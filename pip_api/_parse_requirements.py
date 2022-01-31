@@ -7,6 +7,8 @@ import posixpath
 import string
 import sys
 
+from collections import defaultdict
+
 from typing import Any, Dict, Optional, Union, Tuple
 
 from urllib.parse import urljoin, unquote, urlsplit
@@ -24,6 +26,7 @@ parser.add_argument("-e", "--editable")
 parser.add_argument("-i", "--index-url")
 parser.add_argument("--extra-index-url")
 parser.add_argument("-f", "--find-links")
+parser.add_argument("--hash", action="append", dest="hashes")
 
 operators = specifiers.Specifier._operators.keys()
 
@@ -37,7 +40,8 @@ WHEEL_FILE_RE = re.compile(
     re.VERBOSE,
 )
 WINDOWS = sys.platform.startswith("win") or (sys.platform == "cli" and os.name == "nt")
-
+# https://pip.pypa.io/en/stable/cli/pip_hash/
+VALID_HASHES = {"sha256", "sha384", "sha512"}
 
 class Link:
     def __init__(self, url):
@@ -170,6 +174,14 @@ def _url_to_path(url):
         path = path[1:]
 
     return path
+
+
+class Requirement(requirements.Requirement):
+    def __init__(self, *args, **kwargs):
+        self.hashes = kwargs.pop("hashes", None)
+
+        super().__init__(*args, **kwargs)
+
 
 
 class UnparsedRequirement(object):
@@ -446,7 +458,7 @@ def _parse_requirement_url(req_str):
 
 def parse_requirements(
     filename: os.PathLike, options: Optional[Any] = None, include_invalid: bool = False
-) -> Dict[str, Union[requirements.Requirement, UnparsedRequirement]]:
+) -> Dict[str, Union[Requirement, UnparsedRequirement]]:
     to_parse = {filename}
     parsed = set()
     name_to_req = {}
@@ -463,8 +475,20 @@ def parse_requirements(
         lines_enum = _skip_regex(lines_enum, options)
 
         for lineno, line in lines_enum:
-            req: Optional[Union[requirements.Requirement, UnparsedRequirement]] = None
+            req: Optional[Union[Requirement, UnparsedRequirement]] = None
             known, _ = parser.parse_known_args(line.strip().split())
+
+            hashes_by_kind = defaultdict(list)
+            if known.hashes:
+                for hsh in known.hashes:
+                    kind, hsh = hsh.split(":", 1)
+                    if kind not in VALID_HASHES:
+                        raise PipError(
+                            "invalid --hash kind %s, expected one of %s"
+                            % (kind, VALID_HASHES)
+                        )
+                    hashes_by_kind[kind].append(hsh)
+
             if known.req:
                 req_str = str().join(known.req)
                 try:
@@ -477,7 +501,7 @@ def parse_requirements(
 
                 try:  # Try to parse this as a requirement specification
                     if req is None:
-                        req = requirements.Requirement(parsed_req_str)
+                        req = Requirement(parsed_req_str, hashes=dict(hashes_by_kind))
                 except requirements.InvalidRequirement:
                     try:
                         _check_invalid_requirement(req_str)
@@ -493,7 +517,7 @@ def parse_requirements(
                     to_parse.add(full_path)
             elif known.editable:
                 name, url = _parse_editable(known.editable)
-                req = requirements.Requirement("%s @ %s" % (name, url))
+                req = Requirement("%s @ %s" % (name, url))
             else:
                 pass  # This is an invalid requirement
 

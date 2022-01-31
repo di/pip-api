@@ -253,3 +253,15 @@ def test_parse_requirements_with_missing_egg_suffix(monkeypatch):
         PipError, match=r"Missing egg fragment in URL: " + PEP508_PIP_EXAMPLE_URL
     ):
         pip_api.parse_requirements("a.txt")
+
+
+def test_parse_requirements_hashes(monkeypatch):
+    files = {
+        "a.txt": ["foo==1.2.3 --hash=sha256:862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e"]
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("a.txt")
+
+    assert set(result) == {"foo"}
+    assert result["foo"].hashes == {"sha256": ["862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e"]}
