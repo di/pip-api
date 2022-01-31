@@ -14,6 +14,7 @@ def test_parse_requirements(monkeypatch):
 
     assert set(result) == {"foo"}
     assert str(result["foo"]) == "foo==1.2.3"
+    assert result["foo"].hashes == {}
 
 
 def test_parse_requirements_with_comments(monkeypatch):
