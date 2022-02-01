@@ -293,7 +293,11 @@ def test_parse_requirements_invalid_hash_kind(monkeypatch):
         pip_api.parse_requirements("a.txt")
 
 
-def test_parse_requirements_missing_hashes(monkeypatch):
+@pytest.mark.parametrize(
+    "strict_hashes",
+    (True, False),
+)
+def test_parse_requirements_missing_hashes(monkeypatch, strict_hashes):
     files = {
         "a.txt": [
             "foo==1.2.3 --hash=sha256:862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e\n",
@@ -302,13 +306,20 @@ def test_parse_requirements_missing_hashes(monkeypatch):
     }
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 
-    with pytest.raises(
-        PipError, match=r"missing hashes for requirement in a\.txt, line 2"
-    ):
-        pip_api.parse_requirements("a.txt")
+    if strict_hashes:
+        with pytest.raises(
+            PipError, match=r"missing hashes for requirement in a\.txt, line 2"
+        ):
+            pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+    else:
+        pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
 
 
-def test_parse_requirements_missing_hashes_late(monkeypatch):
+@pytest.mark.parametrize(
+    "strict_hashes",
+    (True, False),
+)
+def test_parse_requirements_missing_hashes_late(monkeypatch, strict_hashes):
     files = {
         "a.txt": [
             "foo==1.2.3\n",
@@ -318,7 +329,10 @@ def test_parse_requirements_missing_hashes_late(monkeypatch):
     }
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 
-    with pytest.raises(
-        PipError, match=r"missing hashes for requirements prior to a\.txt, line 3"
-    ):
-        pip_api.parse_requirements("a.txt")
+    if strict_hashes:
+        with pytest.raises(
+            PipError, match=r"missing hashes for requirements prior to a\.txt, line 3"
+        ):
+            pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+    else:
+        pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)

@@ -457,7 +457,10 @@ def _parse_requirement_url(req_str):
 
 
 def parse_requirements(
-    filename: os.PathLike, options: Optional[Any] = None, include_invalid: bool = False
+    filename: os.PathLike,
+    options: Optional[Any] = None,
+    include_invalid: bool = False,
+    strict_hashes: bool = False,
 ) -> Dict[str, Union[Requirement, UnparsedRequirement]]:
     to_parse = {filename}
     parsed = set()
@@ -480,7 +483,7 @@ def parse_requirements(
             known, _ = parser.parse_known_args(line.strip().split())
 
             # If a requirement is missing hashes but we require them, fail.
-            if not known.hashes and require_hashes:
+            if strict_hashes and not known.hashes and require_hashes:
                 raise PipError(
                     "invalid: missing hashes for requirement in %s, line %s"
                     % (filename, lineno)
@@ -488,7 +491,12 @@ def parse_requirements(
 
             # Similarly, fail if a requirement has hashes but every requirement
             # we've parsed previously hasn't had them.
-            if known.hashes and not require_hashes and len(name_to_req) > 0:
+            if (
+                strict_hashes
+                and known.hashes
+                and not require_hashes
+                and len(name_to_req) > 0
+            ):
                 raise PipError(
                     "invalid: missing hashes for requirements prior to %s, line %s"
                     % (filename, lineno)

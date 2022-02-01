@@ -80,6 +80,7 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > * `Requirement.marker` ([`packaging.markers.Marker`](https://packaging.pypa.io/en/latest/markers/#packaging.markers.Marker)): A `Marker` of the marker for the requirement. Can be `None`.
   > Optionally takes an `options` parameter to override the regex used to skip requirements lines.
   > Optionally takes an `include_invalid` parameter to return an `UnparsedRequirement` in the event that a requirement cannot be parsed correctly.
+  > Optionally takes a `strict_hashes` parameter to require that all requirements have associated hashes.
 
 ### Available with `pip>=8.0.0`:
 * `pip_api.hash(filename, algorithm='sha256')`
