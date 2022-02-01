@@ -24,6 +24,7 @@ parser.add_argument("-e", "--editable")
 parser.add_argument("-i", "--index-url")
 parser.add_argument("--extra-index-url")
 parser.add_argument("-f", "--find-links")
+parser.add_argument("--hash")
 
 operators = specifiers.Specifier._operators.keys()
 
@@ -170,6 +171,12 @@ def _url_to_path(url):
         path = path[1:]
 
     return path
+
+
+class ParsedRequirement(requirements.Requirement):
+    def __init__(self, requirement_str: str, hash: Optional[str]):
+        super().__init__(requirement_str)
+        self.hash = hash
 
 
 class UnparsedRequirement(object):
@@ -446,7 +453,7 @@ def _parse_requirement_url(req_str):
 
 def parse_requirements(
     filename: os.PathLike, options: Optional[Any] = None, include_invalid: bool = False
-) -> Dict[str, Union[requirements.Requirement, UnparsedRequirement]]:
+) -> Dict[str, Union[ParsedRequirement, UnparsedRequirement]]:
     to_parse = {filename}
     parsed = set()
     name_to_req = {}
@@ -463,7 +470,7 @@ def parse_requirements(
         lines_enum = _skip_regex(lines_enum, options)
 
         for lineno, line in lines_enum:
-            req: Optional[Union[requirements.Requirement, UnparsedRequirement]] = None
+            req: Optional[Union[ParsedRequirement, UnparsedRequirement]] = None
             known, _ = parser.parse_known_args(line.strip().split())
             if known.req:
                 req_str = str().join(known.req)
@@ -477,7 +484,7 @@ def parse_requirements(
 
                 try:  # Try to parse this as a requirement specification
                     if req is None:
-                        req = requirements.Requirement(parsed_req_str)
+                        req = ParsedRequirement(parsed_req_str, known.hash)
                 except requirements.InvalidRequirement:
                     try:
                         _check_invalid_requirement(req_str)
@@ -493,7 +500,7 @@ def parse_requirements(
                     to_parse.add(full_path)
             elif known.editable:
                 name, url = _parse_editable(known.editable)
-                req = requirements.Requirement("%s @ %s" % (name, url))
+                req = ParsedRequirement("%s @ %s" % (name, url), known.hash)
             else:
                 pass  # This is an invalid requirement
 
