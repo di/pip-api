@@ -72,7 +72,7 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > * `Distribution.editable` (`bool`): Whether the distribution is editable or not
   > Optionally takes a `local` parameter to filter out globally-installed packages
 
-* `pip_api.parse_requirements(filename, options=None, include_invalid=False)`
+* `pip_api.parse_requirements(filename, options=None, include_invalid=False, strict_hashes=False)`
   > Takes a path to a filename of a Requirements file. Returns a mapping from package name to a [`packaging.requirements.Requirement`](https://packaging.pypa.io/en/latest/requirements/#packaging.requirements.Requirement) object with the following attributes:
   > * `Requirement.name` (`string`): The name of the requirement.
   > * `Requirement.extras` (`set`): A set of extras that the requirement specifies.
