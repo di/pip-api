@@ -462,6 +462,7 @@ def parse_requirements(
     to_parse = {filename}
     parsed = set()
     name_to_req = {}
+    require_hashes = False
 
     while to_parse:
         filename = to_parse.pop()
@@ -478,8 +479,24 @@ def parse_requirements(
             req: Optional[Union[Requirement, UnparsedRequirement]] = None
             known, _ = parser.parse_known_args(line.strip().split())
 
+            # If a requirement is missing hashes but we require them, fail.
+            if not known.hashes and require_hashes:
+                raise PipError(
+                    "invalid: missing hashes for requirement in %s, line %s"
+                    % (filename, lineno)
+                )
+
+            # Similarly, fail if a requirement has hashes but every requirement
+            # we've parsed previously hasn't had them.
+            if known.hashes and not require_hashes and len(name_to_req) > 0:
+                raise PipError(
+                    "invalid: missing hashes for requirements prior to %s, line %s"
+                    % (filename, lineno)
+                )
+
             hashes_by_kind = defaultdict(list)
             if known.hashes:
+                require_hashes = True
                 for hsh in known.hashes:
                     kind, hsh = hsh.split(":", 1)
                     if kind not in VALID_HASHES:

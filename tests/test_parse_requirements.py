@@ -291,3 +291,34 @@ def test_parse_requirements_invalid_hash_kind(monkeypatch):
 
     with pytest.raises(PipError, match=r"invalid --hash kind"):
         pip_api.parse_requirements("a.txt")
+
+
+def test_parse_requirements_missing_hashes(monkeypatch):
+    files = {
+        "a.txt": [
+            "foo==1.2.3 --hash=sha256:862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e\n",
+            "bar==1.2.3\n",
+        ]
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    with pytest.raises(
+        PipError, match=r"missing hashes for requirement in a\.txt, line 2"
+    ):
+        pip_api.parse_requirements("a.txt")
+
+
+def test_parse_requirements_missing_hashes_late(monkeypatch):
+    files = {
+        "a.txt": [
+            "foo==1.2.3\n",
+            "bar==1.2.3\n",
+            "baz==1.2.3 --hash=sha256:862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e\n",
+        ]
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    with pytest.raises(
+        PipError, match=r"missing hashes for requirements prior to a\.txt, line 3"
+    ):
+        pip_api.parse_requirements("a.txt")
