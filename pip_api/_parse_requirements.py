@@ -180,6 +180,8 @@ def _url_to_path(url):
 class Requirement(requirements.Requirement):
     def __init__(self, *args, **kwargs):
         self.hashes = kwargs.pop("hashes", None)
+        self.filename = kwargs.pop("filename")
+        self.lineno = kwargs.pop("lineno")
 
         super().__init__(*args, **kwargs)
 
@@ -465,7 +467,6 @@ def parse_requirements(
     to_parse = {filename}
     parsed = set()
     name_to_req = {}
-    require_hashes = False
 
     while to_parse:
         filename = to_parse.pop()
@@ -482,34 +483,13 @@ def parse_requirements(
             req: Optional[Union[Requirement, UnparsedRequirement]] = None
             known, _ = parser.parse_known_args(line.strip().split())
 
-            # If a requirement is missing hashes but we require them, fail.
-            if strict_hashes and not known.hashes and require_hashes:
-                raise PipError(
-                    "invalid: missing hashes for requirement in %s, line %s"
-                    % (filename, lineno)
-                )
-
-            # Similarly, fail if a requirement has hashes but every requirement
-            # we've parsed previously hasn't had them.
-            if (
-                strict_hashes
-                and known.hashes
-                and not require_hashes
-                and len(name_to_req) > 0
-            ):
-                raise PipError(
-                    "invalid: missing hashes for requirements prior to %s, line %s"
-                    % (filename, lineno)
-                )
-
             hashes_by_kind = defaultdict(list)
             if known.hashes:
-                require_hashes = True
                 for hsh in known.hashes:
                     kind, hsh = hsh.split(":", 1)
                     if kind not in VALID_HASHES:
                         raise PipError(
-                            "invalid --hash kind %s, expected one of %s"
+                            "Invalid --hash kind %s, expected one of %s"
                             % (kind, VALID_HASHES)
                         )
                     hashes_by_kind[kind].append(hsh)
@@ -526,7 +506,12 @@ def parse_requirements(
 
                 try:  # Try to parse this as a requirement specification
                     if req is None:
-                        req = Requirement(parsed_req_str, hashes=dict(hashes_by_kind))
+                        req = Requirement(
+                            parsed_req_str,
+                            hashes=dict(hashes_by_kind),
+                            filename=filename,
+                            lineno=lineno,
+                        )
                 except requirements.InvalidRequirement:
                     try:
                         _check_invalid_requirement(req_str)
@@ -542,7 +527,9 @@ def parse_requirements(
                     to_parse.add(full_path)
             elif known.editable:
                 name, url = _parse_editable(known.editable)
-                req = Requirement("%s @ %s" % (name, url))
+                req = Requirement(
+                    "%s @ %s" % (name, url), filename=filename, lineno=lineno
+                )
             else:
                 pass  # This is an invalid requirement
 
@@ -560,5 +547,13 @@ def parse_requirements(
                         "Double requirement given: %s (already in %s, name=%r)"
                         % (req, name_to_req[req.name], req.name)
                     )
+
+    if strict_hashes:
+        missing_hashes = [req for req in name_to_req.values() if not req.hashes]
+        if 0 < len(missing_hashes) < len(name_to_req):
+            raise PipError(
+                "Missing hashes for requirement in %s, line %s"
+                % (missing_hashes[0].filename, missing_hashes[0].lineno)
+            )
 
     return name_to_req
