@@ -550,7 +550,7 @@ def parse_requirements(
 
     if strict_hashes:
         missing_hashes = [req for req in name_to_req.values() if not req.hashes]
-        if 0 < len(missing_hashes) < len(name_to_req):
+        if len(missing_hashes) > 0:
             raise PipError(
                 "Missing hashes for requirement in %s, line %s"
                 % (missing_hashes[0].filename, missing_hashes[0].lineno)

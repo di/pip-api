@@ -351,3 +351,20 @@ def test_parse_requirements_missing_hashes_late(monkeypatch, strict_hashes):
                 "862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e"
             ],
         }
+
+
+def test_parse_requirements_missing_all_hashes_strict(monkeypatch):
+    files = {
+        "a.txt": [
+            "foo==1.2.3\n",
+            "bar==1.2.3\n",
+            "baz==1.2.3\n",
+        ]
+    }
+
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    with pytest.raises(
+        PipError, match=r"Missing hashes for requirement in a\.txt, line 1"
+    ):
+        pip_api.parse_requirements("a.txt", strict_hashes=True)
