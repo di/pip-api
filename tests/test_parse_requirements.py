@@ -312,7 +312,14 @@ def test_parse_requirements_missing_hashes(monkeypatch, strict_hashes):
         ):
             pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
     else:
-        pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+        result = pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+
+        assert result["foo"].hashes == {
+            "sha256": [
+                "862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e"
+            ],
+        }
+        assert result["bar"].hashes == {}
 
 
 @pytest.mark.parametrize(
@@ -335,4 +342,12 @@ def test_parse_requirements_missing_hashes_late(monkeypatch, strict_hashes):
         ):
             pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
     else:
-        pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+        result = pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+
+        assert result["foo"].hashes == {}
+        assert result["bar"].hashes == {}
+        assert result["baz"].hashes == {
+            "sha256": [
+                "862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e"
+            ],
+        }
