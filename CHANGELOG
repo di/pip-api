@@ -1,3 +1,10 @@
+0.0.27
+----------------------------------------------
+
+- Use correct long flag for requirements (#118)
+- Support for hashed requirements (#126)
+- Drop support for Python 3.6, test against pip==22.0.x (#127)
+
 0.0.26
 ----------------------------------------------
 
