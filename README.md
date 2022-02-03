@@ -73,7 +73,7 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > Optionally takes a `local` parameter to filter out globally-installed packages
 
 * `pip_api.parse_requirements(filename, options=None, include_invalid=False, strict_hashes=False)`
-  > Takes a path to a filename of a Requirements file. Returns a mapping from package name to a [`packaging.requirements.Requirement`](https://packaging.pypa.io/en/latest/requirements/#packaging.requirements.Requirement) subclass object with the following attributes:
+  > Takes a path to a filename of a Requirements file. Returns a mapping from package name to a [`pip_api.Requirement`] object (subclass of [`packaging.requirements.Requirement`](https://packaging.pypa.io/en/latest/requirements/#packaging.requirements.Requirement)) with the following attributes:
   > * `Requirement.name` (`string`): The name of the requirement.
   > * `Requirement.extras` (`set`): A set of extras that the requirement specifies.
   > * `Requirement.specifier` ([`packaging.specifiers.SpecifierSet`](https://packaging.pypa.io/en/latest/specifiers/#packaging.specifiers.SpecifierSet)): A `SpecifierSet` of the version specified by the requirement.
