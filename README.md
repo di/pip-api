@@ -72,14 +72,19 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > * `Distribution.editable` (`bool`): Whether the distribution is editable or not
   > Optionally takes a `local` parameter to filter out globally-installed packages
 
-* `pip_api.parse_requirements(filename, options=None, include_invalid=False)`
-  > Takes a path to a filename of a Requirements file. Returns a mapping from package name to a [`packaging.requirements.Requirement`](https://packaging.pypa.io/en/latest/requirements/#packaging.requirements.Requirement) object with the following attributes:
+* `pip_api.parse_requirements(filename, options=None, include_invalid=False, strict_hashes=False)`
+  > Takes a path to a filename of a Requirements file. Returns a mapping from package name to a `pip_api.Requirement` object (subclass of [`packaging.requirements.Requirement`](https://packaging.pypa.io/en/latest/requirements/#packaging.requirements.Requirement)) with the following attributes:
   > * `Requirement.name` (`string`): The name of the requirement.
   > * `Requirement.extras` (`set`): A set of extras that the requirement specifies.
   > * `Requirement.specifier` ([`packaging.specifiers.SpecifierSet`](https://packaging.pypa.io/en/latest/specifiers/#packaging.specifiers.SpecifierSet)): A `SpecifierSet` of the version specified by the requirement.
   > * `Requirement.marker` ([`packaging.markers.Marker`](https://packaging.pypa.io/en/latest/markers/#packaging.markers.Marker)): A `Marker` of the marker for the requirement. Can be `None`.
+  > * `Requirement.hashes` (`dict`): A mapping of hashes for the requirement, corresponding to `--hash=...` options.
+  > * `Requirement.filename` (`str`): The filename that the requirement originates from.
+  > * `Requirement.lineno` (`int`): The source line that the requirement was parsed from.
+  >
   > Optionally takes an `options` parameter to override the regex used to skip requirements lines.
   > Optionally takes an `include_invalid` parameter to return an `UnparsedRequirement` in the event that a requirement cannot be parsed correctly.
+  > Optionally takes a `strict_hashes` parameter to require that all requirements have associated hashes.
 
 ### Available with `pip>=8.0.0`:
 * `pip_api.hash(filename, algorithm='sha256')`

@@ -14,6 +14,7 @@ def test_parse_requirements(monkeypatch):
 
     assert set(result) == {"foo"}
     assert str(result["foo"]) == "foo==1.2.3"
+    assert result["foo"].hashes == {}
 
 
 def test_parse_requirements_with_comments(monkeypatch):
@@ -253,3 +254,117 @@ def test_parse_requirements_with_missing_egg_suffix(monkeypatch):
         PipError, match=r"Missing egg fragment in URL: " + PEP508_PIP_EXAMPLE_URL
     ):
         pip_api.parse_requirements("a.txt")
+
+
+def test_parse_requirements_hashes(monkeypatch):
+    files = {
+        "a.txt": [
+            "foo==1.2.3 "
+            "--hash=sha256:862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e "
+            "--hash=sha256:0cfea7e5a53d5a256b4e8609c8a1812ad9af5c611432ec9dccbb4d79dc6a336e "
+            "--hash=sha384:673546e6c3236a36e5db5f1bc9d2cb5f3f974d3d4e9031f405b1dc7874575e2ad91436d02edf8237a889ab1cecb35d56 "
+            "--hash=sha512:3b149832490a704091abed6a9bd40ef7f4176b279263d4cbbb440b067ced99cadc006c03bc47488755351022fb49f2f10edfec110f027039bda703d407135c47"
+        ]
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("a.txt")
+
+    assert set(result) == {"foo"}
+    assert result["foo"].hashes == {
+        "sha256": [
+            "862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e",
+            "0cfea7e5a53d5a256b4e8609c8a1812ad9af5c611432ec9dccbb4d79dc6a336e",
+        ],
+        "sha384": [
+            "673546e6c3236a36e5db5f1bc9d2cb5f3f974d3d4e9031f405b1dc7874575e2ad91436d02edf8237a889ab1cecb35d56"
+        ],
+        "sha512": [
+            "3b149832490a704091abed6a9bd40ef7f4176b279263d4cbbb440b067ced99cadc006c03bc47488755351022fb49f2f10edfec110f027039bda703d407135c47"
+        ],
+    }
+
+
+def test_parse_requirements_invalid_hash_kind(monkeypatch):
+    files = {"a.txt": ["foo==1.2.3 --hash=md5:0d5a28f01dccb5a549c31016883f59c2"]}
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    with pytest.raises(PipError, match=r"Invalid --hash kind"):
+        pip_api.parse_requirements("a.txt")
+
+
+@pytest.mark.parametrize(
+    "strict_hashes",
+    (True, False),
+)
+def test_parse_requirements_missing_hashes(monkeypatch, strict_hashes):
+    files = {
+        "a.txt": [
+            "foo==1.2.3 --hash=sha256:862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e\n",
+            "bar==1.2.3\n",
+        ]
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    if strict_hashes:
+        with pytest.raises(
+            PipError, match=r"Missing hashes for requirement in a\.txt, line 2"
+        ):
+            pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+    else:
+        result = pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+
+        assert result["foo"].hashes == {
+            "sha256": [
+                "862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e"
+            ],
+        }
+        assert result["bar"].hashes == {}
+
+
+@pytest.mark.parametrize(
+    "strict_hashes",
+    (True, False),
+)
+def test_parse_requirements_missing_hashes_late(monkeypatch, strict_hashes):
+    files = {
+        "a.txt": [
+            "foo==1.2.3\n",
+            "bar==1.2.3\n",
+            "baz==1.2.3 --hash=sha256:862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e\n",
+        ]
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    if strict_hashes:
+        with pytest.raises(
+            PipError, match=r"Missing hashes for requirement in a\.txt, line 1"
+        ):
+            pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+    else:
+        result = pip_api.parse_requirements("a.txt", strict_hashes=strict_hashes)
+
+        assert result["foo"].hashes == {}
+        assert result["bar"].hashes == {}
+        assert result["baz"].hashes == {
+            "sha256": [
+                "862db587c4257f71293cf07cafc521961712c088a52981f3d81be056eaabc95e"
+            ],
+        }
+
+
+def test_parse_requirements_missing_all_hashes_strict(monkeypatch):
+    files = {
+        "a.txt": [
+            "foo==1.2.3\n",
+            "bar==1.2.3\n",
+            "baz==1.2.3\n",
+        ]
+    }
+
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    with pytest.raises(
+        PipError, match=r"Missing hashes for requirement in a\.txt, line 1"
+    ):
+        pip_api.parse_requirements("a.txt", strict_hashes=True)
