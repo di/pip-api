@@ -529,7 +529,10 @@ def parse_requirements(
             elif known.editable:
                 name, url = _parse_editable(known.editable)
                 req = Requirement(
-                    "%s @ %s" % (name, url), filename=filename, lineno=lineno, editable=True
+                    "%s @ %s" % (name, url),
+                    filename=filename,
+                    lineno=lineno,
+                    editable=True,
                 )
             else:
                 pass  # This is an invalid requirement
