@@ -191,7 +191,7 @@ def test_parse_requirements_editable(monkeypatch):
     assert str(result["django"]) == "Django==1.11"
     assert not result["django"].editable
     assert str(result["deal"]) == "deal@ git+https://github.com/foo/deal.git#egg=deal"
-    assert result["dead"].editable
+    assert result["deal"].editable
 
 
 def test_parse_requirements_editable_file(monkeypatch):
