@@ -180,6 +180,7 @@ def _url_to_path(url):
 class Requirement(requirements.Requirement):
     def __init__(self, *args, **kwargs):
         self.hashes = kwargs.pop("hashes", None)
+        self.editable = kwargs.pop("editable", False)
         self.filename = kwargs.pop("filename")
         self.lineno = kwargs.pop("lineno")
 
