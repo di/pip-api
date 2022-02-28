@@ -79,6 +79,7 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > * `Requirement.specifier` ([`packaging.specifiers.SpecifierSet`](https://packaging.pypa.io/en/latest/specifiers/#packaging.specifiers.SpecifierSet)): A `SpecifierSet` of the version specified by the requirement.
   > * `Requirement.marker` ([`packaging.markers.Marker`](https://packaging.pypa.io/en/latest/markers/#packaging.markers.Marker)): A `Marker` of the marker for the requirement. Can be `None`.
   > * `Requirement.hashes` (`dict`): A mapping of hashes for the requirement, corresponding to `--hash=...` options.
+  > * `Requirement.editable` (`bool`): Whether the requirement is editable, corresponding to `-e ...`
   > * `Requirement.filename` (`str`): The filename that the requirement originates from.
   > * `Requirement.lineno` (`int`): The source line that the requirement was parsed from.
   >

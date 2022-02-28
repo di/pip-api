@@ -180,6 +180,7 @@ def _url_to_path(url):
 class Requirement(requirements.Requirement):
     def __init__(self, *args, **kwargs):
         self.hashes = kwargs.pop("hashes", None)
+        self.editable = kwargs.pop("editable", False)
         self.filename = kwargs.pop("filename")
         self.lineno = kwargs.pop("lineno")
 
@@ -528,7 +529,10 @@ def parse_requirements(
             elif known.editable:
                 name, url = _parse_editable(known.editable)
                 req = Requirement(
-                    "%s @ %s" % (name, url), filename=filename, lineno=lineno
+                    "%s @ %s" % (name, url),
+                    filename=filename,
+                    lineno=lineno,
+                    editable=True,
                 )
             else:
                 pass  # This is an invalid requirement
