@@ -27,6 +27,7 @@ parser.add_argument("-i", "--index-url")
 parser.add_argument("--extra-index-url")
 parser.add_argument("-f", "--find-links")
 parser.add_argument("--hash", action="append", dest="hashes")
+parser.add_argument("--trusted-host")
 
 operators = specifiers.Specifier._operators.keys()
 
