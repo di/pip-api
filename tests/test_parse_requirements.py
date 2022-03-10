@@ -28,7 +28,8 @@ def test_parse_requirements_with_comments(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "flag", ["-i", "--index-url", "--extra-index-url", "-f", "--find-links"]
+    "flag",
+    ["-i", "--index-url", "--extra-index-url", "-f", "--find-links", "--trusted-host"],
 )
 def test_parse_requirements_with_index_url(monkeypatch, flag):
     files = {
