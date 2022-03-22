@@ -8,7 +8,7 @@ import virtualenv
 
 from pip_api._vendor.packaging.version import Version
 
-import pip_api
+import pip_api as _pip_api
 
 
 @pytest.fixture
@@ -127,7 +127,7 @@ class PipTestEnvironment:
         # Install the right version of pip. By default,
         # virtualenv gets the version from the wheels that
         # are bundled along with it
-        self.run("install", "pip=={}".format(str(pip_api.PIP_VERSION)))
+        self.run("install", "pip=={}".format(str(_pip_api.PIP_VERSION)))
 
     def run(self, *args):
         python_location = os.environ["PIPAPI_PYTHON_LOCATION"]
@@ -145,3 +145,9 @@ def pip(tmpdir, venv):
     ``tests.lib.scripttest.PipTestEnvironment``.
     """
     return PipTestEnvironment()
+
+
+@pytest.fixture(params=[True, False])
+def pip_api(request, monkeypatch):
+    monkeypatch.setattr(_pip_api, "VENDORED", request.param)
+    return _pip_api
