@@ -18,6 +18,17 @@ def some_distribution(data):
         version=Version("0.0.1"),
         location=None,
         filename=data.join("dummyproject-0.0.1-py3-none-any.whl"),
+        editable=False,
+    )
+
+
+@pytest.fixture
+def some_editable_distribution(data):
+    return pretend.stub(
+        name="dummyproject",
+        version=Version("0.0.1"),
+        location=None,
+        filename=data.join("dummyproject"),
         editable=True,
     )
 
