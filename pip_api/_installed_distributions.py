@@ -11,7 +11,13 @@ from pip_api._vendor.packaging.version import parse  # type: ignore
 
 
 class Distribution:
-    def __init__(self, name: str, version: str, location: Optional[str] = None, editable_project_location: Optional[str] = None):
+    def __init__(
+        self,
+        name: str,
+        version: str,
+        location: Optional[str] = None,
+        editable_project_location: Optional[str] = None,
+    ):
         self.name = name
         self.version = parse(version)
         self.location = location
@@ -27,7 +33,9 @@ class Distribution:
             self.name,
             self.version,
             ", location='{}'".format(self.location) if self.location else "",
-            ", editable_project_location='{}'".format(self.editable_project_location) if self.editable_project_location else "",
+            ", editable_project_location='{}'".format(self.editable_project_location)
+            if self.editable_project_location
+            else "",
         )
 
 
@@ -81,7 +89,10 @@ def _new_installed_distributions(local: bool, paths: List[os.PathLike]):
     # so we also don't assume its presence.
     for raw_dist in json.loads(result):
         dist = Distribution(
-            raw_dist["name"], raw_dist["version"], raw_dist.get("location"), raw_dist.get("editable_project_location")
+            raw_dist["name"],
+            raw_dist["version"],
+            raw_dist.get("location"),
+            raw_dist.get("editable_project_location"),
         )
         ret[dist.name] = dist
 
