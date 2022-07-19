@@ -95,3 +95,10 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
 ### Available with `pip>=19.2`:
 * `pip_api.installed_distributions(local=False, paths=[])`
   > As described above, but with an extra optional `paths` parameter to provide a list of locations to look for installed distributions. Attempting to use the `paths` parameter with `pip<19.2` will result in a `PipError`.
+
+## Use cases
+This library is in use by a number of other tools, including:
+* [`pip-audit`](https://pypi.org/project/pip-audit/), to analyze dependencies for known vulnerabilities
+* [`pytest-reqs`](https://pypi.org/project/pytest-reqs), to compare requirements files with test dependencies
+* [`hashin`](https://pypi.org/project/hashin/), to add hash pinning to requirements files
+* ...and many more.
