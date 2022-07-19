@@ -1,3 +1,8 @@
+0.0.30
+----------------------------------------------
+- Support editable project location (#148)
+- Test against pip 22.1.x
+
 0.0.29
 ----------------------------------------------
 - Do not treat `--trusted-host` as a requirement (#136)
