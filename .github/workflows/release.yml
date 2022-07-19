@@ -6,7 +6,11 @@ on:
 name: release
 
 permissions:
+  # Needed to access the workflow's OIDC identity.
   id-token: write
+
+  # Needed to upload release assets.
+  contents: write
 
 jobs:
   pypi:
