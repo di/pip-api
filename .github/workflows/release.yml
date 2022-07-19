@@ -35,3 +35,13 @@ jobs:
       uses: trailofbits/gh-action-sigstore-python@v0.0.2
       with:
         inputs: ./dist/*.tar.gz ./dist/*.whl
+
+    - name: upload artifacts to github
+      # Confusingly, this action also supports updating releases, not
+      # just creating them. This is what we want here, since we've manually
+      # created the release that triggered the action.
+      uses: softprops/action-gh-release@v1
+      with:
+        # dist/ contains the built packages, which smoketest-artifacts/
+        # contains the signatures and certificates.
+        files: dist/*
