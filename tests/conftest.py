@@ -88,7 +88,7 @@ def isolate(tmpdir):
 
     # Create a directory to use as our home location.
     home_dir = os.path.join(str(tmpdir), "home")
-    os.makedirs(home_dir)
+    os.makedirs(home_dir, exist_ok=True)
 
     # Set our home directory to our temporary directory, this should force
     # all of our relative configuration files to be read from here instead
