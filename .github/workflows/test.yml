@@ -16,7 +16,6 @@ jobs:
 
   build-matrix:
     name: Build the test matrix
-    needs: lint
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -31,7 +30,9 @@ jobs:
 
   test:
     name: ${{ matrix.toxenv }}
-    needs: build-matrix
+    needs:
+    - build-matrix
+    - lint
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
