@@ -1,14 +1,24 @@
 name: Test
 on: [push, pull_request]
+concurrency:
+  group: >-
+    ${{
+        github.workflow
+    }}-${{
+        github.ref_type
+    }}-${{
+        github.event.pull_request.number || github.sha
+    }}
+  cancel-in-progress: true
 jobs:
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
       - name: Install tox
         run: python -m pip install tox
       - name: Run linting
@@ -21,13 +31,14 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
       - name: Install tox
         run: python -m pip install tox
       - id: set-matrix
-        run: echo "::set-output name=matrix::$(python generate_matrix.py)"
+        run: >-
+          echo "matrix=$(python generate_matrix.py)" >> "${GITHUB_OUTPUT}"
 
   test:
     name: ${{ matrix.toxenv }}
@@ -36,9 +47,9 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install tox
