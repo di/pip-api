@@ -60,6 +60,9 @@ def test_installed_distributions_editable(pip, some_editable_distribution):
 
 
 def test_installed_distributions_legacy_version(pip, data):
+    # Use an older setuptools to build this with a legacy version
+    pip.run("install", "setuptools<66")
+
     distributions = pip_api.installed_distributions()
 
     assert "dummyproject" not in distributions
