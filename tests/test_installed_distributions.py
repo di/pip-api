@@ -59,6 +59,7 @@ def test_installed_distributions_editable(pip, some_editable_distribution):
         assert distribution.editable
 
 
+@pytest.mark.xfail(pip_api.PIP_VERSION >= parse("23.1"), reason="Unsupported")
 def test_installed_distributions_legacy_version(pip, data):
     # Use an older setuptools to build this with a legacy version
     pip.run("install", "setuptools<66")
