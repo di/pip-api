@@ -19,8 +19,12 @@ def hash(filename: os.PathLike, algorithm: str = "sha256") -> str:
     if algorithm not in ["sha256", "sha384", "sha512"]:
         raise InvalidArguments("Algorithm {} not supported".format(algorithm))
 
-    result = call("hash", "--algorithm", algorithm, filename)
+    if pip_api.VENDORED:
+        from pip._internal.commands.hash import _hash_of_file
 
-    # result is of the form:
-    # <filename>:\n--hash=<algorithm>:<hash>\n
-    return result.strip().split(":")[-1]
+        return _hash_of_file(str(filename), algorithm)
+    else:
+        result = call("hash", "--algorithm", algorithm, filename)
+        # result is of the form:
+        # <filename>:\n--hash=<algorithm>:<hash>\n
+        return result.strip().split(":")[-1]
