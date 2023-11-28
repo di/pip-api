@@ -7,7 +7,7 @@ import pip_api
 from pip_api._call import call
 from pip_api.exceptions import PipError
 
-from pip_api._vendor.packaging.version import parse  # type: ignore
+from pip_api._vendor.packaging_legacy.version import parse  # type: ignore
 
 
 class Distribution:

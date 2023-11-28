@@ -21,4 +21,5 @@ exclude = '''
 target = 'pip_api'
 packages = [
     "packaging==23.2",
+    "packaging_legacy==23.0",
 ]
