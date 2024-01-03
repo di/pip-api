@@ -1,3 +1,7 @@
+0.0.31
+----------------------------------------------
+- Handle editable projects with pyproject.toml (#200)
+
 0.0.30
 ----------------------------------------------
 - Support editable project location (#148)
