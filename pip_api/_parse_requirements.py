@@ -9,11 +9,12 @@ import sys
 
 from collections import defaultdict
 
-from typing import Any, Dict, Optional, Union, Tuple
+from typing import Any, Dict, Optional, Union
 
 from urllib.parse import urljoin, unquote, urlsplit
 from urllib.request import pathname2url, url2pathname
 
+from pip_api._vendor import tomli
 from pip_api._vendor.packaging import requirements, specifiers  # type: ignore
 
 from pip_api.exceptions import PipError
@@ -246,7 +247,28 @@ def _path_to_url(path):
 
 
 def _parse_local_package_name(path):
-    """Tokenize setup.py and walk the syntax tree to find the package name"""
+    # Determine the package name from a local directory
+    pyproject_toml = os.path.join(path, "pyproject.toml")
+    setup_py = os.path.join(path, "setup.py")
+    has_pyproject = os.path.isfile(pyproject_toml)
+    has_setup = os.path.isfile(setup_py)
+
+    if not has_pyproject and not has_setup:
+        raise PipError(
+            f"{path} does not appear to be a Python project: "
+            f"neither 'setup.py' nor 'pyproject.toml' found."
+        )
+
+    # Prefer the name in `pyproject.toml`
+    if has_pyproject:
+        with open(pyproject_toml, encoding="utf-8") as f:
+            pp_toml = tomli.loads(f.read())
+            name = pp_toml.get("project", {}).get("name")
+            if name is not None:
+                return name
+
+    # Fall back on tokenizing setup.py and walk the syntax tree to find the
+    # package name
     try:
         with open(os.path.join(path, "setup.py")) as f:
             tree = ast.parse(f.read())
