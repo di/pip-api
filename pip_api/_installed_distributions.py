@@ -33,9 +33,13 @@ class Distribution:
             self.name,
             self.version,
             ", location='{}'".format(self.location) if self.location else "",
-            ", editable_project_location='{}'".format(self.editable_project_location)
-            if self.editable_project_location
-            else "",
+            (
+                ", editable_project_location='{}'".format(
+                    self.editable_project_location
+                )
+                if self.editable_project_location
+                else ""
+            ),
         )
 
 
