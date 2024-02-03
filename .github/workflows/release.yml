@@ -17,9 +17,9 @@ jobs:
     name: upload release to PyPI
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ">= 3.7"
 
@@ -36,7 +36,7 @@ jobs:
         password: ${{ secrets.PYPI_TOKEN }}
 
     - name: sign
-      uses: sigstore/gh-action-sigstore-python@v0.0.9
+      uses: sigstore/gh-action-sigstore-python@v2.1.1
       with:
         inputs: ./dist/*.tar.gz ./dist/*.whl
 
