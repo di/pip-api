@@ -29,5 +29,5 @@ setup(
     python_requires=">=3.7",
     url="http://github.com/di/pip-api",
     summary="An unofficial, importable pip API",
-    version="0.0.31",
+    version="0.0.32",
 )
