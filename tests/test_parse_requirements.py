@@ -218,6 +218,22 @@ def test_parse_requirements_editable_pyprojecttoml(monkeypatch, data):
     )
 
 
+def test_parse_requirements_editable_escaped_path(monkeypatch, data):
+    files = {
+        "a.txt": [f"-e {data.join('escapable@path/dummyproject_pyproject')}\n"],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("a.txt")
+
+    assert set(result) == {"dummyproject_pyproject"}
+    assert str(result["dummyproject_pyproject"]).startswith(
+        "dummyproject_pyproject@ file:///"
+    )
+    # The @ in `escapable@path` should be URL-encoded
+    assert "escapable%40path" in str(result["dummyproject_pyproject"])
+
+
 def test_parse_requirements_with_relative_references(monkeypatch):
     files = {
         "reqs/base.txt": ["django==1.11\n"],
