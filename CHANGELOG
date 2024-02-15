@@ -1,3 +1,8 @@
+0.0.32
+----------------------------------------------
+- Handle editable projects with URL-sensitive characters in their paths (#208)
+- Test against pip 24.x (#204)
+
 0.0.31
 ----------------------------------------------
 - Handle editable projects with pyproject.toml (#200)
