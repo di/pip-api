@@ -1,3 +1,7 @@
+0.0.33
+----------------------------------------------
+- Corrective release for 0.0.32
+
 0.0.32
 ----------------------------------------------
 - Handle editable projects with URL-sensitive characters in their paths (#208)
