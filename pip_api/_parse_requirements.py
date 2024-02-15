@@ -1,22 +1,18 @@
 import argparse
 import ast
 import os
-import re
-import traceback
 import posixpath
+import re
 import string
 import sys
-
+import traceback
 from collections import defaultdict
-
 from typing import Any, Dict, Optional, Union
-
-from urllib.parse import urljoin, unquote, urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 from urllib.request import pathname2url, url2pathname
 
 from pip_api._vendor import tomli
 from pip_api._vendor.packaging import requirements, specifiers  # type: ignore
-
 from pip_api.exceptions import PipError
 
 parser = argparse.ArgumentParser()
@@ -293,18 +289,21 @@ def _parse_editable(editable_req):
 
     # If a file path is specified with extras, strip off the extras.
     url_no_extras, extras = _strip_extras(url)
+    original_url = url_no_extras
 
-    if os.path.isdir(url_no_extras):
-        if not os.path.exists(os.path.join(url_no_extras, "setup.py")):
+    if os.path.isdir(original_url):
+        if not os.path.exists(os.path.join(original_url, "setup.py")):
             raise PipError(
                 "Directory %r is not installable. File 'setup.py' not found."
-                % url_no_extras
+                % original_url
             )
         # Treating it as code that has already been checked out
         url_no_extras = _path_to_url(url_no_extras)
 
     if url_no_extras.lower().startswith("file:"):
-        return _parse_local_package_name(url_no_extras[len("file://") :]), url_no_extras
+        # NOTE: url_no_extras may contain escaped characters here, meaning that
+        # it may no longer be a literal package path. So we pass original_url.
+        return _parse_local_package_name(original_url), url_no_extras
 
     if "+" not in url:
         raise PipError(
