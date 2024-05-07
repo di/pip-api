@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 env:
   dists-artifact-name: python-package-distributions
-  sdist-artifact-name-wildcard: pip-api-*.tar.gz
+  sdist-artifact-name-wildcard: pip_api-*.tar.gz
 jobs:
 
   lint:
