@@ -8,6 +8,7 @@ from pip_api._version import version
 
 PIP_VERSION: Version = packaging_version.parse(version())  # type: ignore
 PYTHON_VERSION = sys.version_info
+VENDORED = False
 
 # Import these because they depend on the above
 from pip_api._hash import hash
