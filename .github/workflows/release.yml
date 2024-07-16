@@ -33,7 +33,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
 
     - name: sign
-      uses: sigstore/gh-action-sigstore-python@v2.1.1
+      uses: sigstore/gh-action-sigstore-python@v3.0.0
       with:
         inputs: ./dist/*.tar.gz ./dist/*.whl
 
@@ -41,7 +41,7 @@ jobs:
       # Confusingly, this action also supports updating releases, not
       # just creating them. This is what we want here, since we've manually
       # created the release that triggered the action.
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         # dist/ contains the built packages, which smoketest-artifacts/
         # contains the signatures and certificates.
