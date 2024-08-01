@@ -40,7 +40,9 @@ class Distribution:
         )
 
 
-def _new_installed_distributions(local: bool, paths: List[os.PathLike]):
+def installed_distributions(
+    local: bool = False, paths: List[os.PathLike] = []
+) -> Dict[str, Distribution]:
     list_args = ["list", "-v", "--format=json"]
     if local:
         list_args.append("--local")
@@ -65,9 +67,3 @@ def _new_installed_distributions(local: bool, paths: List[os.PathLike]):
         ret[dist.name] = dist
 
     return ret
-
-
-def installed_distributions(
-    local: bool = False, paths: List[os.PathLike] = []
-) -> Dict[str, Distribution]:
-    return _new_installed_distributions(local, paths)
