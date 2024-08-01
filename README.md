@@ -88,7 +88,7 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > Optionally takes a `strict_hashes` parameter to require that all requirements have associated hashes.
 
 * `pip_api.hash(filename, algorithm='sha256')`
-  > Returns the resulting as a string.
+  > Returns the resulting hash digest as a string.
   > Valid `algorithm` parameters are `'sha256'`, `'sha384'`, and `'sha512'`
 
 * `pip_api.installed_distributions(local=False, paths=[])`
