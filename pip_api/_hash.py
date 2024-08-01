@@ -1,20 +1,13 @@
 import os
 
-from pip_api._vendor.packaging.version import Version  # type: ignore
-
-import pip_api
 from pip_api._call import call
-from pip_api.exceptions import Incompatible, InvalidArguments
-
-incompatible = pip_api.PIP_VERSION < Version("8.0.0")
+from pip_api.exceptions import InvalidArguments
 
 
 def hash(filename: os.PathLike, algorithm: str = "sha256") -> str:
     """
-    Hash the given filename. Unavailable in `pip<8.0.0`
+    Hash the given filename.
     """
-    if incompatible:
-        raise Incompatible
 
     if algorithm not in ["sha256", "sha384", "sha512"]:
         raise InvalidArguments("Algorithm {} not supported".format(algorithm))
