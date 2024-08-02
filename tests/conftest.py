@@ -106,8 +106,6 @@ def venv(tmpdir, isolate):
     temporary directory.
     """
     venv_location = os.path.join(str(tmpdir), "workspace", "venv")
-    # Create the virtualenv without pip installed; we'll explicitly install it
-    # in each temporary environment.
     venv = virtualenv.create(venv_location, with_pip=True)
 
     os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(venv_location, "bin", "python")
