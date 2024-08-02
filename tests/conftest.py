@@ -1,14 +1,13 @@
 import os
 import shutil
 import subprocess
+import venv as virtualenv
 
-import pytest
 import pretend
-import virtualenv
-
-from pip_api._vendor.packaging.version import Version
+import pytest
 
 import pip_api
+from pip_api._vendor.packaging.version import Version
 
 
 @pytest.fixture
@@ -107,7 +106,9 @@ def venv(tmpdir, isolate):
     temporary directory.
     """
     venv_location = os.path.join(str(tmpdir), "workspace", "venv")
-    venv = virtualenv.cli_run([venv_location])
+    # Create the virtualenv without pip installed; we'll explicitly install it
+    # in each temporary environment.
+    venv = virtualenv.create(venv_location, with_pip=False)
 
     os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(venv_location, "bin", "python")
 
@@ -135,9 +136,7 @@ def other_target(tmpdir):
 
 class PipTestEnvironment:
     def __init__(self):
-        # Install the right version of pip. By default,
-        # virtualenv gets the version from the wheels that
-        # are bundled along with it
+        # Install the right version of pip.
         self.run("install", "pip=={}".format(str(pip_api.PIP_VERSION)))
 
     def run(self, *args):
