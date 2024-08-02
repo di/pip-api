@@ -1,14 +1,13 @@
 import os
 import shutil
 import subprocess
+import venv
 
-import pytest
 import pretend
-import virtualenv
-
-from pip_api._vendor.packaging.version import Version
+import pytest
 
 import pip_api
+from pip_api._vendor.packaging.version import Version
 
 
 @pytest.fixture
@@ -100,18 +99,18 @@ def isolate(tmpdir):
 
 
 @pytest.fixture
-def venv(tmpdir, isolate):
+def temp_venv(tmpdir, isolate):
     """
     Return a virtual environment which is unique to each test function
     invocation created inside of a sub directory of the test function's
     temporary directory.
     """
     venv_location = os.path.join(str(tmpdir), "workspace", "venv")
-    venv = virtualenv.cli_run([venv_location])
+    env = venv.create(venv_location, with_pip=True)
 
     os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(venv_location, "bin", "python")
 
-    yield venv
+    yield env
 
     del os.environ["PIPAPI_PYTHON_LOCATION"]
     shutil.rmtree(venv_location)
@@ -135,9 +134,7 @@ def other_target(tmpdir):
 
 class PipTestEnvironment:
     def __init__(self):
-        # Install the right version of pip. By default,
-        # virtualenv gets the version from the wheels that
-        # are bundled along with it
+        # Install the right version of pip.
         self.run("install", "pip=={}".format(str(pip_api.PIP_VERSION)))
 
     def run(self, *args):
@@ -148,7 +145,7 @@ class PipTestEnvironment:
 
 
 @pytest.fixture()
-def pip(tmpdir, venv):
+def pip(tmpdir, temp_venv):
     """
     Return a PipTestEnvironment which is unique to each test function and
     will execute all commands inside of the unique virtual environment for this
