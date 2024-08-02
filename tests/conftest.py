@@ -1,7 +1,7 @@
 import os
 import shutil
 import subprocess
-import venv as virtualenv
+import venv
 
 import pretend
 import pytest
@@ -99,18 +99,18 @@ def isolate(tmpdir):
 
 
 @pytest.fixture
-def venv(tmpdir, isolate):
+def temp_venv(tmpdir, isolate):
     """
     Return a virtual environment which is unique to each test function
     invocation created inside of a sub directory of the test function's
     temporary directory.
     """
     venv_location = os.path.join(str(tmpdir), "workspace", "venv")
-    venv = virtualenv.create(venv_location, with_pip=True)
+    env = venv.create(venv_location, with_pip=True)
 
     os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(venv_location, "bin", "python")
 
-    yield venv
+    yield env
 
     del os.environ["PIPAPI_PYTHON_LOCATION"]
     shutil.rmtree(venv_location)
@@ -145,7 +145,7 @@ class PipTestEnvironment:
 
 
 @pytest.fixture()
-def pip(tmpdir, venv):
+def pip(tmpdir, temp_venv):
     """
     Return a PipTestEnvironment which is unique to each test function and
     will execute all commands inside of the unique virtual environment for this
