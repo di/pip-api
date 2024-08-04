@@ -105,7 +105,6 @@ import copy
 import sys
 import warnings
 import re
-import sre_constants
 import collections
 import pprint
 import traceback
@@ -3306,15 +3305,13 @@ class Regex(Token):
 
             self.pattern = pattern
             self.flags = flags
-
             try:
                 self.re = re.compile(self.pattern, self.flags)
                 self.reString = self.pattern
-            except sre_constants.error:
+            except re.error:
                 warnings.warn("invalid pattern (%s) passed to Regex" % pattern,
                               SyntaxWarning, stacklevel=2)
                 raise
-
         elif hasattr(pattern, 'pattern') and hasattr(pattern, 'match'):
             self.re = pattern
             self.pattern = self.reString = pattern.pattern
