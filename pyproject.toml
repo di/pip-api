@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "pip_api"
-version = "0.0.30"
+version = "0.0.34"
 description = "An unofficial, importable pip API"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -13,15 +13,14 @@ classifiers = [
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
-dependencies = [
-  "pip",
-]
-requires-python = ">=3.7"
+dependencies = ["pip"]
+requires-python = ">=3.8"
 
 [project.urls]
 Homepage = "https://pypi.org/project/pip-api/"
@@ -49,7 +48,4 @@ exclude = '''
 
 [tool.vendy]
 target = 'pip_api'
-packages = [
-    "packaging==21.0",
-    "pyparsing==2.4.7",
-]
+packages = ["packaging==21.0", "pyparsing==2.4.7", "tomli==2.0.1"]

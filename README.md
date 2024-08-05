@@ -87,12 +87,10 @@ If the command you are trying to use is not compatible, `pip_api` will raise a
   > Optionally takes an `include_invalid` parameter to return an `UnparsedRequirement` in the event that a requirement cannot be parsed correctly.
   > Optionally takes a `strict_hashes` parameter to require that all requirements have associated hashes.
 
-### Available with `pip>=8.0.0`:
 * `pip_api.hash(filename, algorithm='sha256')`
-  > Returns the resulting as a string.
+  > Returns the resulting hash digest as a string.
   > Valid `algorithm` parameters are `'sha256'`, `'sha384'`, and `'sha512'`
 
-### Available with `pip>=19.2`:
 * `pip_api.installed_distributions(local=False, paths=[])`
   > As described above, but with an extra optional `paths` parameter to provide a list of locations to look for installed distributions. Attempting to use the `paths` parameter with `pip<19.2` will result in a `PipError`.
 

@@ -1,3 +1,21 @@
+0.0.34
+----------------------------------------------
+- Test against pip 24.1.x (#213, #216, #218, #220, #222)
+- Drop support for Python 3.7 (#223)
+
+0.0.33
+----------------------------------------------
+- Corrective release for 0.0.32
+
+0.0.32
+----------------------------------------------
+- Handle editable projects with URL-sensitive characters in their paths (#208)
+- Test against pip 24.0.x (#204)
+
+0.0.31
+----------------------------------------------
+- Handle editable projects with pyproject.toml (#200)
+
 0.0.30
 ----------------------------------------------
 - Support editable project location (#148)
