@@ -27,6 +27,9 @@ Homepage = "https://pypi.org/project/pip-api/"
 Issues = "https://github.com/di/pip-api/issues"
 Source = "https://github.com/di/pip-api"
 
+[tool.flit.sdist]
+include = ["tests/", "tox.ini"]
+
 [tool.black]
 exclude = '''
 (
