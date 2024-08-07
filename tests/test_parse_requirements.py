@@ -199,9 +199,9 @@ def test_parse_requirements_editable_file(monkeypatch):
 
     result = pip_api.parse_requirements("a.txt")
 
-    assert set(result) == {"django", "pip-api"}
+    assert set(result) == {"django", "pip_api"}
     assert str(result["django"]) == "Django==1.11"
-    assert str(result["pip-api"]).startswith("pip-api@ file:///")
+    assert str(result["pip_api"]).startswith("pip_api@ file:///")
 
 
 def test_parse_requirements_editable_pyprojecttoml(monkeypatch, data):
