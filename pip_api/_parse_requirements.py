@@ -296,7 +296,7 @@ def _parse_editable(editable_req):
         setup_path = os.path.join(original_url, "setup.py")
         if not any(os.path.exists(p) for p in (pyproject_path, setup_path)):
             raise PipError(
-                "Directory %r is not installable. File 'setup.py' not found."
+                "Directory %r is not installable. No 'setup.py' or 'pyproject.toml' found."
                 % original_url
             )
         # Treating it as code that has already been checked out
