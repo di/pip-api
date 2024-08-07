@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "pip_api"
@@ -26,9 +26,6 @@ requires-python = ">=3.8"
 Homepage = "https://pypi.org/project/pip-api/"
 Issues = "https://github.com/di/pip-api/issues"
 Source = "https://github.com/di/pip-api"
-
-[tool.flit.sdist]
-include = ["tests/", "tox.ini"]
 
 [tool.black]
 exclude = '''
