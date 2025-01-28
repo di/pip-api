@@ -124,6 +124,7 @@ jobs:
     if: always()
     needs:
     - test
+    - test-windows
     runs-on: ubuntu-latest
     steps:
     - name: Decide whether the needed jobs succeeded or failed
