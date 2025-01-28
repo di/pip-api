@@ -100,6 +100,26 @@ jobs:
       - name: Run tests
         run: python -m tox -e ${{ matrix.toxenv }}
 
+  test-windows:
+    name: Run tests on Windows
+    needs:
+      - build-sdist
+    runs-on: windows-latest
+    steps:
+      - name: Retrieve the project source from an sdist inside the GHA artifact
+        uses: re-actors/checkout-python-sdist@release/v1
+        with:
+          source-tarball-name: ${{ env.sdist-artifact-name-wildcard }}
+          workflow-artifact-name: ${{ env.dists-artifact-name }}
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install tox
+        run: python -m pip install tox
+      - name: Run tests
+        run: python -m tox -e py313-pip250
+
   check:
     if: always()
     needs:
