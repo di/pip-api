@@ -108,7 +108,14 @@ def temp_venv(tmpdir, isolate):
     venv_location = os.path.join(str(tmpdir), "workspace", "venv")
     env = venv.create(venv_location, with_pip=True)
 
-    os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(venv_location, "bin", "python")
+    if os.name == "nt":
+        os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(
+            venv_location, "Scripts", "python.exe"
+        )
+    else:
+        os.environ["PIPAPI_PYTHON_LOCATION"] = os.path.join(
+            venv_location, "bin", "python"
+        )
 
     yield env
 
