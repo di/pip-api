@@ -118,7 +118,7 @@ jobs:
       - name: Install tox
         run: python -m pip install tox
       - name: Run tests
-        run: python -m tox -e py313-pip250
+        run: python -m tox -m latest
 
   check:
     if: always()
