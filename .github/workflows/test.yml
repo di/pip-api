@@ -48,7 +48,7 @@ jobs:
         dist/${{ env.sdist-artifact-name-wildcard }}
 
     - name: Store the distribution package
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.dists-artifact-name }}
         # NOTE: Exact expected file names are specified here
