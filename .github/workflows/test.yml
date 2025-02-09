@@ -87,7 +87,7 @@ jobs:
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
     steps:
       - name: Retrieve the project source from an sdist inside the GHA artifact
-        uses: re-actors/checkout-python-sdist@release/v1
+        uses: re-actors/checkout-python-sdist@release/v2
         with:
           source-tarball-name: ${{ env.sdist-artifact-name-wildcard }}
           workflow-artifact-name: ${{ env.dists-artifact-name }}
@@ -107,7 +107,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Retrieve the project source from an sdist inside the GHA artifact
-        uses: re-actors/checkout-python-sdist@release/v1
+        uses: re-actors/checkout-python-sdist@release/v2
         with:
           source-tarball-name: ${{ env.sdist-artifact-name-wildcard }}
           workflow-artifact-name: ${{ env.dists-artifact-name }}
