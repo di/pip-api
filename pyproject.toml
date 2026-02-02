@@ -1,3 +1,28 @@
+[project]
+name = "pip_api"
+version = "0.0.35"
+description = "An unofficial, importable pip API"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Dustin Ingram", email = "di@python.org" }]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = ["pip"]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://pypi.org/project/pip-api/"
+Issues = "https://github.com/di/pip-api/issues"
+Source = "https://github.com/di/pip-api"
+
 [tool.black]
 exclude = '''
 (
@@ -8,6 +33,7 @@ exclude = '''
     | \.mypy_cache
     | \.tox
     | \.venv
+    | env
     | _build
     | buck-out
     | build
@@ -22,4 +48,6 @@ target = 'pip_api'
 packages = [
     "packaging==23.2",
     "packaging_legacy==23.0.post0",
+    "pyparsing==2.4.7",
+    "tomli==2.0.1",
 ]

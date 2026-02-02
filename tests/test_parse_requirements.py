@@ -1,4 +1,4 @@
-from textwrap import dedent
+import os
 
 import pytest
 
@@ -182,7 +182,7 @@ def test_parse_requirements_multiline(monkeypatch, lines):
 
 def test_parse_requirements_editable(monkeypatch):
     files = {
-        "a.txt": ["Django==1.11\n" "-e git+https://github.com/foo/deal.git#egg=deal\n"]
+        "a.txt": ["Django==1.11\n-e git+https://github.com/foo/deal.git#egg=deal\n"]
     }
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 
@@ -196,21 +196,55 @@ def test_parse_requirements_editable(monkeypatch):
 
 
 def test_parse_requirements_editable_file(monkeypatch):
-    files = {"a.txt": ["Django==1.11\n" "-e .\n"]}
+    files = {"a.txt": ["Django==1.11\n-e .\n"]}
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 
     result = pip_api.parse_requirements("a.txt")
 
-    assert set(result) == {"django", "pip-api"}
+    assert set(result) == {"django", "pip_api"}
     assert str(result["django"]) == "Django==1.11"
-    assert str(result["pip-api"]).startswith("pip-api@ file:///")
+    assert str(result["pip_api"]).startswith("pip_api@ file:///")
+
+
+def test_parse_requirements_editable_pyprojecttoml(monkeypatch, data):
+    files = {
+        "a.txt": [f"-e {data.join('dummyproject_pyproject')}\n"],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("a.txt")
+
+    assert set(result) == {"dummyproject_pyproject"}
+    assert str(result["dummyproject_pyproject"]).startswith(
+        "dummyproject_pyproject@ file:///"
+    )
+
+
+def test_parse_requirements_editable_escaped_path(monkeypatch, data):
+    files = {
+        "a.txt": [f"-e {data.join('escapable@path/dummyproject_pyproject')}\n"],
+    }
+    monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
+
+    result = pip_api.parse_requirements("a.txt")
+
+    assert set(result) == {"dummyproject_pyproject"}
+    assert str(result["dummyproject_pyproject"]).startswith(
+        "dummyproject_pyproject@ file:///"
+    )
+    # The @ in `escapable@path` should be URL-encoded
+    assert "escapable%40path" in str(result["dummyproject_pyproject"])
 
 
 def test_parse_requirements_with_relative_references(monkeypatch):
+    # NOTE: The top-level file is accessed via the literal path passed into
+    # `parse_requirements`, while relative files are accessed by joining them
+    # with the directory. Hence the top-level has a forward slash always,
+    # while the relative files have whatever path separator the host uses.
     files = {
-        "reqs/base.txt": ["django==1.11\n"],
-        "reqs/test.txt": ["-r base.txt\n"],
-        "reqs/dev.txt": ["-r base.txt\n" "-r test.txt\n"],
+        os.path.join("reqs", "base.txt"): ["django==1.11\n"],
+        os.path.join("reqs", "test.txt"): ["-r base.txt\n"],
+        "reqs/dev.txt": ["-r base.txt\n-r test.txt\n"],
     }
     monkeypatch.setattr(pip_api._parse_requirements, "_read_file", files.get)
 

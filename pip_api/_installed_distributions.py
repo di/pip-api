@@ -1,11 +1,9 @@
 import json
-import re
 import os
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import pip_api
 from pip_api._call import call
-from pip_api.exceptions import PipError
 
 from pip_api._vendor.packaging_legacy.version import parse  # type: ignore
 
@@ -33,46 +31,19 @@ class Distribution:
             self.name,
             self.version,
             ", location='{}'".format(self.location) if self.location else "",
-            ", editable_project_location='{}'".format(self.editable_project_location)
-            if self.editable_project_location
-            else "",
+            (
+                ", editable_project_location='{}'".format(
+                    self.editable_project_location
+                )
+                if self.editable_project_location
+                else ""
+            ),
         )
 
 
-def _old_installed_distributions(local: bool):
-    list_args = ["list"]
-    if local:
-        list_args.append("--local")
-    result = call(*list_args)
-
-    # result is of the form:
-    # <package_name> (<version>)
-    #
-    # or, if editable
-    # <package_name> (<version>, <location>)
-    #
-    # or, could be a warning line
-
-    ret = {}
-
-    pattern = re.compile(r"(.*) \((.*)\)")
-
-    for line in result.strip().split("\n"):
-        match = re.match(pattern, line)
-
-        if match:
-            name, paren = match.groups()
-            version, location = (paren.split(", ") + [None])[:2]
-
-            ret[name] = Distribution(name, version, location)
-        else:
-            # This is a warning line or some other output
-            pass
-
-    return ret
-
-
-def _new_installed_distributions(local: bool, paths: List[os.PathLike]):
+def installed_distributions(
+    local: bool = False, paths: List[os.PathLike] = []
+) -> Dict[str, Distribution]:
     list_args = ["list", "-v", "--format=json"]
     if local:
         list_args.append("--local")
@@ -97,16 +68,3 @@ def _new_installed_distributions(local: bool, paths: List[os.PathLike]):
         ret[dist.name] = dist
 
     return ret
-
-
-def installed_distributions(
-    local: bool = False, paths: List[os.PathLike] = []
-) -> Dict[str, Distribution]:
-    # Check whether our version of pip supports the `--path` parameter
-    if pip_api.PIP_VERSION < parse("19.2") and paths:
-        raise PipError(
-            f"pip {pip_api.PIP_VERSION} does not support the `paths` argument"
-        )
-    if pip_api.PIP_VERSION < parse("9.0.0"):
-        return _old_installed_distributions(local)
-    return _new_installed_distributions(local, paths)
