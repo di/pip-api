@@ -2,8 +2,13 @@
 # 2.0, and the BSD License. See the LICENSE file in the root of this repository
 # for complete details.
 
+import typing
 
+
+@typing.final
 class InfinityType:
+    __slots__ = ()
+
     def __repr__(self) -> str:
         return "Infinity"
 
@@ -19,9 +24,6 @@ class InfinityType:
     def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__)
 
-    def __ne__(self, other: object) -> bool:
-        return not isinstance(other, self.__class__)
-
     def __gt__(self, other: object) -> bool:
         return True
 
@@ -35,7 +37,10 @@ class InfinityType:
 Infinity = InfinityType()
 
 
+@typing.final
 class NegativeInfinityType:
+    __slots__ = ()
+
     def __repr__(self) -> str:
         return "-Infinity"
 
@@ -50,9 +55,6 @@ class NegativeInfinityType:
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__)
-
-    def __ne__(self, other: object) -> bool:
-        return not isinstance(other, self.__class__)
 
     def __gt__(self, other: object) -> bool:
         return False
