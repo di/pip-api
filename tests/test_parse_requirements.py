@@ -64,14 +64,14 @@ PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
             "pip @ {url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
             {"pip"},
             PEP508_PIP_EXAMPLE_URL,
-            "pip@ " + PEP508_PIP_EXAMPLE_URL,
+            "pip @ " + PEP508_PIP_EXAMPLE_URL,
             "",
         ),
         (
             "pip@{url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
             {"pip"},
             PEP508_PIP_EXAMPLE_URL,
-            "pip@ " + PEP508_PIP_EXAMPLE_URL,  # Note extra space after @
+            "pip @ " + PEP508_PIP_EXAMPLE_URL,  # Note extra space after @
             "",
         ),
         (
@@ -87,7 +87,7 @@ PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
             "git+" + PEP508_PIP_EXAMPLE_EGG,
             {"pip"},
             PEP508_PIP_EXAMPLE_EGG,
-            "pip@ " + PEP508_PIP_EXAMPLE_EGG,
+            "pip @ " + PEP508_PIP_EXAMPLE_EGG,
             "",
         ),
         (
@@ -101,7 +101,7 @@ PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
             PEP508_PIP_EXAMPLE_EGG_FILE,
             {"pip"},
             PEP508_PIP_EXAMPLE_EGG_FILE,
-            "pip@ " + PEP508_PIP_EXAMPLE_EGG_FILE,
+            "pip @ " + PEP508_PIP_EXAMPLE_EGG_FILE,
             "",
         ),
         (PEP508_PIP_EXAMPLE_WHEEL_FILE, {"pip"}, None, "pip==1.3.1", "==1.3.1"),
@@ -191,7 +191,7 @@ def test_parse_requirements_editable(monkeypatch):
     assert set(result) == {"django", "deal"}
     assert str(result["django"]) == "Django==1.11"
     assert not result["django"].editable
-    assert str(result["deal"]) == "deal@ git+https://github.com/foo/deal.git#egg=deal"
+    assert str(result["deal"]) == "deal @ git+https://github.com/foo/deal.git#egg=deal"
     assert result["deal"].editable
 
 
@@ -216,7 +216,7 @@ def test_parse_requirements_editable_pyprojecttoml(monkeypatch, data):
 
     assert set(result) == {"dummyproject_pyproject"}
     assert str(result["dummyproject_pyproject"]).startswith(
-        "dummyproject_pyproject@ file:///"
+        "dummyproject_pyproject @ file:///"
     )
 
 
@@ -230,7 +230,7 @@ def test_parse_requirements_editable_escaped_path(monkeypatch, data):
 
     assert set(result) == {"dummyproject_pyproject"}
     assert str(result["dummyproject_pyproject"]).startswith(
-        "dummyproject_pyproject@ file:///"
+        "dummyproject_pyproject @ file:///"
     )
     # The @ in `escapable@path` should be URL-encoded
     assert "escapable%40path" in str(result["dummyproject_pyproject"])
