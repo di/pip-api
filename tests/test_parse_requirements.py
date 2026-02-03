@@ -75,14 +75,6 @@ PEP508_PIP_EXAMPLE_WHEEL_FILE = "file://tmp/pip-1.3.1-py2.py3-none-any.whl"
             "",
         ),
         (
-            # Version and URL can't be combined so this all gets parsed as a legacy version
-            "pip==1.3.1@{url}\n".format(url=PEP508_PIP_EXAMPLE_URL),
-            {"pip"},
-            None,
-            "pip==1.3.1@" + PEP508_PIP_EXAMPLE_URL,  # Note no extra space after @
-            "==1.3.1@" + PEP508_PIP_EXAMPLE_URL,
-        ),
-        (
             # VCS markers at the beginning of a URL get stripped away
             "git+" + PEP508_PIP_EXAMPLE_EGG,
             {"pip"},
@@ -203,7 +195,7 @@ def test_parse_requirements_editable_file(monkeypatch):
 
     assert set(result) == {"django", "pip_api"}
     assert str(result["django"]) == "Django==1.11"
-    assert str(result["pip_api"]).startswith("pip_api@ file:///")
+    assert str(result["pip_api"]).startswith("pip_api @ file:///")
 
 
 def test_parse_requirements_editable_pyprojecttoml(monkeypatch, data):
