@@ -45,4 +45,9 @@ exclude = '''
 
 [tool.vendy]
 target = 'pip_api'
-packages = ["packaging==21.0", "pyparsing==2.4.7", "tomli==2.0.1"]
+packages = [
+    "packaging==23.2",
+    "packaging_legacy==23.0.post0",
+    "pyparsing==2.4.7",
+    "tomli==2.0.1",
+]
