@@ -195,7 +195,7 @@ def test_parse_requirements_editable_file(monkeypatch):
 
     assert set(result) == {"django", "pip_api"}
     assert str(result["django"]) == "Django==1.11"
-    assert str(result["pip_api"]).startswith("pip_api @ file:///")
+    assert str(result["pip_api"]).startswith("pip_api @ file:/")
 
 
 def test_parse_requirements_editable_pyprojecttoml(monkeypatch, data):
@@ -208,7 +208,7 @@ def test_parse_requirements_editable_pyprojecttoml(monkeypatch, data):
 
     assert set(result) == {"dummyproject_pyproject"}
     assert str(result["dummyproject_pyproject"]).startswith(
-        "dummyproject_pyproject @ file:///"
+        "dummyproject_pyproject @ file:/"
     )
 
 
@@ -222,7 +222,7 @@ def test_parse_requirements_editable_escaped_path(monkeypatch, data):
 
     assert set(result) == {"dummyproject_pyproject"}
     assert str(result["dummyproject_pyproject"]).startswith(
-        "dummyproject_pyproject @ file:///"
+        "dummyproject_pyproject @ file:/"
     )
     # The @ in `escapable@path` should be URL-encoded
     assert "escapable%40path" in str(result["dummyproject_pyproject"])
