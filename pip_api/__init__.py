@@ -1,7 +1,7 @@
 import sys
 
 from pip_api._vendor.packaging import version as packaging_version
-from pip_api._vendor.packaging.version import Version
+from pip_api._vendor.packaging_legacy.version import LegacyVersion as Version
 
 # Import this now because we need it below
 from pip_api._version import version
