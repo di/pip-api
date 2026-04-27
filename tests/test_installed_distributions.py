@@ -3,7 +3,7 @@ import os
 import pytest
 
 import pip_api
-from pip_api._vendor.packaging.version import parse
+from pip_api._vendor.packaging_legacy.version import parse
 
 
 def test_installed_distributions(pip, some_distribution):

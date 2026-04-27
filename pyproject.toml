@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "pip_api"
 version = "0.0.35"
@@ -14,6 +18,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = ["pip"]
 requires-python = ">=3.9"
@@ -45,4 +50,4 @@ exclude = '''
 
 [tool.vendy]
 target = 'pip_api'
-packages = ["packaging==21.0", "pyparsing==2.4.7", "tomli==2.0.1"]
+packages = ["packaging==26.2", "packaging-legacy==23.0.post0", "tomli==2.0.1"]
