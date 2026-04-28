@@ -397,3 +397,144 @@ def test_parse_requirements_missing_all_hashes_strict(monkeypatch):
         PipError, match=r"Missing hashes for requirement in a\.txt, line 1"
     ):
         pip_api.parse_requirements("a.txt", strict_hashes=True)
+
+
+@pytest.fixture
+def pylock_file(data):
+    return data.join("pylock.toml")
+
+
+def test_parse_requirements_pylock_old_pip(monkeypatch, pylock_file):
+    from pip_api._vendor.packaging.version import Version
+
+    monkeypatch.setattr(pip_api, "PIP_VERSION", Version("24.0"))
+
+    with pytest.raises(
+        PipError, match=r"Parsing pylock\.toml files requires pip >= 26\.1"
+    ):
+        pip_api.parse_requirements(pylock_file)
+
+
+def test_parse_requirements_pylock(monkeypatch, pylock_file):
+    from pip_api._vendor.packaging.version import Version
+
+    monkeypatch.setattr(pip_api, "PIP_VERSION", Version("26.1"))
+
+    result = pip_api.parse_requirements(pylock_file)
+
+    assert set(result) == {"foo", "bar"}
+    assert str(result["foo"]) == "foo==1.2.3"
+    assert str(result["bar"]) == "bar==2.0.0"
+
+
+def test_parse_requirements_pylock_hashes(monkeypatch, pylock_file):
+    from pip_api._vendor.packaging.version import Version
+
+    monkeypatch.setattr(pip_api, "PIP_VERSION", Version("26.1"))
+
+    result = pip_api.parse_requirements(pylock_file)
+
+    assert result["foo"].hashes == {
+        "sha256": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+    }
+    assert result["bar"].hashes == {
+        "sha256": ["bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"]
+    }
+
+
+def test_parse_requirements_pylock_with_markers(monkeypatch, tmp_path):
+    from pip_api._vendor.packaging.version import Version
+
+    monkeypatch.setattr(pip_api, "PIP_VERSION", Version("26.1"))
+
+    pylock_content = """\
+lock-version = "1.0"
+created-by = "pip"
+
+[[packages]]
+name = "foo"
+version = "1.2.3"
+marker = "python_version <= '2.7'"
+
+[[packages.wheels]]
+name = "foo-1.2.3-py3-none-any.whl"
+url = "https://example.com/packages/foo-1.2.3-py3-none-any.whl"
+hashes = {sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+
+[[packages]]
+name = "bar"
+version = "2.0.0"
+marker = "python_version > '2.7'"
+
+[[packages.wheels]]
+name = "bar-2.0.0-py3-none-any.whl"
+url = "https://example.com/packages/bar-2.0.0-py3-none-any.whl"
+hashes = {sha256 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+"""
+    pylock = tmp_path / "pylock.toml"
+    pylock.write_text(pylock_content, encoding="utf-8")
+
+    result = pip_api.parse_requirements(str(pylock))
+
+    # We don't support such old Python versions, so if we've managed to run these
+    # tests, we should have chosen bar==2.0.0
+    assert set(result) == {"bar"}
+    assert str(result["bar"]) == 'bar==2.0.0; python_version > "2.7"'
+
+
+def test_parse_requirements_pylock_via_requirement_flag(monkeypatch, tmp_path):
+    from pip_api._vendor.packaging.version import Version
+
+    monkeypatch.setattr(pip_api, "PIP_VERSION", Version("26.1"))
+
+    pylock_content = """\
+lock-version = "1.0"
+created-by = "pip"
+
+[[packages]]
+name = "foo"
+version = "1.2.3"
+
+[[packages.wheels]]
+name = "foo-1.2.3-py3-none-any.whl"
+url = "https://example.com/packages/foo-1.2.3-py3-none-any.whl"
+hashes = {sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+"""
+    pylock = tmp_path / "pylock.toml"
+    pylock.write_text(pylock_content, encoding="utf-8")
+    reqs_txt = tmp_path / "requirements.txt"
+    reqs_txt.write_text("bar==2.0.0\n-r pylock.toml\n", encoding="utf-8")
+
+    result = pip_api.parse_requirements(str(reqs_txt))
+
+    assert set(result) == {"foo", "bar"}
+    assert str(result["foo"]) == "foo==1.2.3"
+    assert str(result["bar"]) == "bar==2.0.0"
+
+
+def test_parse_requirements_pylock_named(monkeypatch, tmp_path):
+    from pip_api._vendor.packaging.version import Version
+
+    monkeypatch.setattr(pip_api, "PIP_VERSION", Version("26.1"))
+
+    pylock_content = """\
+lock-version = "1.0"
+created-by = "pip"
+
+[[packages]]
+name = "foo"
+version = "1.2.3"
+
+[[packages.wheels]]
+name = "foo-1.2.3-py3-none-any.whl"
+url = "https://example.com/packages/foo-1.2.3-py3-none-any.whl"
+hashes = {sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+"""
+    pylock = tmp_path / "pylock.default.toml"
+    pylock.write_text(pylock_content, encoding="utf-8")
+
+    result = pip_api.parse_requirements(str(pylock))
+
+    assert set(result) == {"foo"}
+    assert str(result["foo"]) == "foo==1.2.3"
+
