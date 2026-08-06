@@ -15,6 +15,8 @@ from pip_api._vendor import tomli
 from pip_api._vendor.packaging import requirements, specifiers  # type: ignore
 from pip_api.exceptions import PipError
 
+_PYLOCK_FILE_NAME_RE = re.compile(r"^pylock(\.[^.]+)?\.toml$")
+
 parser = argparse.ArgumentParser()
 parser.add_argument("req", nargs="*")
 parser.add_argument("-r", "--requirement")
@@ -483,6 +485,90 @@ def _parse_requirement_url(req_str):
     return req_str
 
 
+def _is_pylock_file(filename):
+    """Check if a filename is a valid pylock.toml file."""
+    basename = os.path.basename(filename)
+    return bool(_PYLOCK_FILE_NAME_RE.match(basename))
+
+
+def _parse_pylock_requirements(filename, include_invalid=False):
+    """Parse a pylock.toml file and return a dict mapping names to Requirements."""
+    # Import here to avoid circular imports at module load time
+    import pip_api
+    from pip_api._vendor.packaging import version as packaging_version
+
+    if pip_api.PIP_VERSION < packaging_version.parse("26.1"):
+        raise PipError(
+            "Parsing pylock.toml files requires pip >= 26.1, "
+            "but the current pip version is {}".format(pip_api.PIP_VERSION)
+        )
+
+    with open(filename, encoding="utf-8") as f:
+        data = tomli.loads(f.read())
+
+    name_to_req = {}
+    packages = data.get("packages", [])
+
+    for lineno, package in enumerate(packages, 1):
+        name = package.get("name")
+        if name is None:
+            continue
+
+        version = package.get("version")
+        req_str = "{}=={}".format(name, version) if version is not None else name
+
+        # Handle environment markers
+        marker_str = package.get("marker")
+        if marker_str:
+            req_str = "{}; {}".format(req_str, marker_str)
+
+        # Collect hashes from wheels and sdist/archive entries
+        hashes_by_kind = defaultdict(list)
+        for wheel in package.get("wheels") or []:
+            for hash_kind, hash_val in (wheel.get("hashes") or {}).items():
+                hashes_by_kind[hash_kind].append(hash_val)
+        for dist_key in ("sdist", "archive"):
+            dist = package.get(dist_key)
+            if dist:
+                for hash_kind, hash_val in (dist.get("hashes") or {}).items():
+                    hashes_by_kind[hash_kind].append(hash_val)
+
+        req: Optional[Union[Requirement, UnparsedRequirement]] = None
+        try:
+            req = Requirement(
+                req_str,
+                hashes=dict(hashes_by_kind),
+                filename=filename,
+                lineno=lineno,
+            )
+        except requirements.InvalidRequirement as e:
+            if include_invalid:
+                req = UnparsedRequirement(name, str(e), filename, lineno)
+            else:
+                raise PipError(
+                    "Invalid requirement {!r}: {}".format(req_str, e)
+                ) from e
+
+        if req is None:
+            continue
+
+        if not isinstance(req, UnparsedRequirement):
+            req.comes_from = "-r {} (line {})".format(filename, lineno)  # type: ignore
+            if req.marker is not None and not req.marker.evaluate():
+                continue
+
+        name_key = req.name.lower()
+        if name_key not in name_to_req:
+            name_to_req[name_key] = req
+        else:
+            raise PipError(
+                "Double requirement given: %s (already in %s, name=%r)"
+                % (req, name_to_req[name_key], req.name)
+            )
+
+    return name_to_req
+
+
 def parse_requirements(
     filename: os.PathLike,
     options: Optional[Any] = None,
@@ -497,6 +583,19 @@ def parse_requirements(
         filename = to_parse.pop()
         dirname = os.path.dirname(filename)
         parsed.add(filename)
+
+        # Handle pylock.toml files differently from regular requirements files
+        if _is_pylock_file(filename):
+            pylock_reqs = _parse_pylock_requirements(filename, include_invalid=include_invalid)
+            for name_key, req in pylock_reqs.items():
+                if name_key not in name_to_req:
+                    name_to_req[name_key] = req
+                else:
+                    raise PipError(
+                        "Double requirement given: %s (already in %s, name=%r)"
+                        % (req, name_to_req[name_key], req.name)
+                    )
+            continue
 
         # Combine multi-line commands
         lines = "".join(_read_file(filename)).replace("\\\n", "").splitlines()
