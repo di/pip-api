@@ -1,0 +1,20 @@
+lock-version = "1.0"
+created-by = "pip"
+
+[[packages]]
+name = "foo"
+version = "1.2.3"
+
+[[packages.wheels]]
+name = "foo-1.2.3-py3-none-any.whl"
+url = "https://example.com/packages/foo-1.2.3-py3-none-any.whl"
+hashes = {sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+
+[[packages]]
+name = "bar"
+version = "2.0.0"
+
+[[packages.wheels]]
+name = "bar-2.0.0-py3-none-any.whl"
+url = "https://example.com/packages/bar-2.0.0-py3-none-any.whl"
+hashes = {sha256 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
